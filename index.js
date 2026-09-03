@@ -211,9 +211,57 @@ const CSS_MODERNO = `
 
     .input-classic { width: 100%; padding: 15px; margin-bottom: 15px; border-radius: 12px; border: 1px solid var(--border-soft); background: var(--btn-light); font-family: 'Inter', sans-serif; box-sizing: border-box;}
     .btn-submit { background: var(--btn-dark); color: white; border: none; padding: 15px; border-radius: 12px; font-weight: 700; cursor: pointer; width: 100%; }
+
+    /* ESTILOS AÑADIDOS PARA SUGERENCIA DE DOMINIO */
+    .sugerencia-dominio {
+        background: #1e293b;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 50px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 10px;
+        transition: 0.2s ease;
+        border: 1px solid #334155;
+    }
+    .sugerencia-dominio:hover {
+        background: #334155;
+        transform: translateY(-2px);
+    }
 </style>
 
 <script>
+    /* FUNCIONES AÑADIDAS PARA CAMBIAR DOMINIO */
+    function verificarHotmail(inputElem, platKey) {
+        let valor = inputElem.value.toLowerCase();
+        let sugerencia = document.getElementById('sugerencia_ghoulflix_' + platKey);
+        
+        // Si el usuario escribe @hotmail.com, mostramos el botón
+        if (valor.includes('@hotmail.com')) {
+            sugerencia.style.display = 'inline-flex';
+        } else {
+            sugerencia.style.display = 'none';
+        }
+    }
+
+    function cambiarDominio(platKey) {
+        let inputElem = document.getElementById('email_search_' + platKey);
+        let valor = inputElem.value.toLowerCase();
+        
+        // Reemplazamos únicamente el dominio manteniendo el usuario intacto
+        if (valor.includes('@hotmail.com')) {
+            inputElem.value = valor.replace('@hotmail.com', '@ghoulflix.com');
+            // Ocultamos el botón después de hacer clic
+            document.getElementById('sugerencia_ghoulflix_' + platKey).style.display = 'none';
+            // Devolvemos el foco al input por si el cliente quiere presionar Enter
+            inputElem.focus();
+        }
+    }
+
     function openTab(tabId) {
         document.querySelectorAll('.main-card').forEach(p => p.classList.remove('active'));
         let selectedTab = document.getElementById(tabId);
@@ -360,7 +408,16 @@ app.get('/dash', async (req, res) => {
                             <button type="submit" name="accion" value="pais" class="action-btn-pill">🌍 ANALIZAR PAÍS</button>
                             <button type="submit" name="accion" value="ip" class="action-btn-pill">📡 BUSCAR IP</button>
                         </div>
-                        <input type="text" name="email_search" class="search-input-large" placeholder="✉️ Buscar correo registrado en ${plat.nombre}..." required>
+                        
+                        <!-- CAMBIO: INPUT MODIFICADO CON LA SUGERENCIA DE DOMINIO -->
+                        <div style="position: relative; width: 100%;">
+                            <input type="text" id="email_search_${key}" name="email_search" class="search-input-large" placeholder="✉️ Buscar correo registrado en ${plat.nombre}..." oninput="verificarHotmail(this, '${key}')" required>
+                            
+                            <div id="sugerencia_ghoulflix_${key}" class="sugerencia-dominio" onclick="cambiarDominio('${key}')" style="display: none;">
+                                🔁 Usar <strong>@ghoulflix.com</strong>
+                            </div>
+                        </div>
+
                     </form>
                 </div>`;
             });
