@@ -322,7 +322,6 @@ app.get('/dash', async (req, res) => {
                 </div>`;
             });
 
-            // 🚀 TARJETA DE GMAIL CORREGIDA: Ocultando el correo real
             plataformasCardsHtml += `
             <div class="plat-card">
                 <div style="position:absolute; top:-50px; right:-50px; width:150px; height:150px; background:radial-gradient(circle, rgba(234, 67, 53, 0.08) 0%, transparent 70%); border-radius:50%; pointer-events:none;"></div>
@@ -333,7 +332,7 @@ app.get('/dash', async (req, res) => {
                 <div class="plat-stats">
                     <span>Buzón Central</span>
                     <div class="line" style="background: #ea4335;"></div>
-                    <small>Buzón Universal</small> <!-- TEXTO OCULTO PARA CLIENTES -->
+                    <small>Buzón Universal</small> 
                 </div>
                 <div class="plat-actions">
                     <button class="btn-dark-blue" onclick="openTab('panel-gmail')">📧 Gmail Consultar</button>
@@ -364,13 +363,12 @@ app.get('/dash', async (req, res) => {
                 </div>`;
             });
 
-            // 🚀 PANEL GMAIL CORREGIDO: Ocultando el correo real
             plataformasPanelsHtml += `
             <div id="panel-gmail" class="main-card">
                 <div class="main-card-header">
                     <img src="https://upload.wikimedia.org/wikipedia/commons/7/7e/Gmail_icon_%282020%29.svg" alt="Gmail" class="main-card-logo" style="height: 40px; filter: drop-shadow(0px 0px 15px #ea4335);">
                     <div class="main-card-title">
-                        <h3>Gestor Buzón Universal</h3> <!-- TEXTO OCULTO PARA CLIENTES -->
+                        <h3>Gestor Buzón Universal</h3>
                         <p>Busca el último reenvío del correo ingresado (Ej: Hotmail).</p>
                     </div>
                 </div>
@@ -651,12 +649,10 @@ app.post('/buscar', async (req, res) => {
             
             let keywordPlat = (plataforma && PLATAFORMAS[plataforma]) ? PLATAFORMAS[plataforma].keyword_from : '';
 
-            // 🚀 SI ES CONSULTA GMAIL DIRECTA: TRAE ABSOLUTAMENTE EL ÚLTIMO CORREO QUE LLEGÓ SIN FILTRAR NADA
             if (esConsultaGmailDirecta) {
                 let searchResults = await connection.search(['ALL'], { bodies: ['HEADER'] });
 
                 if (searchResults.length > 0) {
-                    // Ordenar de mayor a menor para obtener el más reciente de la bandeja
                     searchResults.sort((a, b) => b.attributes.uid - a.attributes.uid);
                     let latestUid = searchResults[0].attributes.uid; 
                     
@@ -667,10 +663,22 @@ app.post('/buscar', async (req, res) => {
                     }
                 }
             } else if (esHotmailBuzonCompartido) {
-                let searchResults = await connection.search([['X-GM-RAW', correoIngresado]], { bodies: ['HEADER'] });
+                // 🚀 AQUÍ ESTÁ LA SOLUCIÓN: Transformar el correo ingresado a @ghoulflix.com internamente
+                let usuarioBase = correoIngresado.split('@')[0];
+                let correoTransformado = usuarioBase + '@ghoulflix.com';
+
+                // Buscar usando el correo con dominio ghoulflix
+                let searchResults = await connection.search([['X-GM-RAW', correoTransformado]], { bodies: ['HEADER'] });
+                
+                if (searchResults.length === 0) {
+                    searchResults = await connection.search([['TEXT', correoTransformado]], { bodies: ['HEADER'] });
+                }
+                
+                // Por si en algún momento el reenvío llega con el correo original de hotmail
                 if (searchResults.length === 0) {
                     searchResults = await connection.search([['TEXT', correoIngresado]], { bodies: ['HEADER'] });
                 }
+
                 if (searchResults.length > 0) {
                     searchResults.sort((a, b) => b.attributes.uid - a.attributes.uid);
                     let latestUid = searchResults[0].attributes.uid; 
