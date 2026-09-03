@@ -620,11 +620,11 @@ app.post('/buscar', async (req, res) => {
         let correoIngresado = (email_search || "").trim().toLowerCase();
         let esConsultaGmailDirecta = (plataforma === 'gmail_consultar');
 
-        // Definir la cuenta de Gmail fija para el buzón universal
+        // 1. Siempre se conectará a aniketseller2@gmail.com por defecto
         let correoSeleccionado = 'aniketseller2@gmail.com';
-        let esHotmailBuzonCompartido = (correoIngresado.includes('@hotmail.') || correoIngresado.includes('@outlook.'));
 
-        if (!esConsultaGmailDirecta && !esHotmailBuzonCompartido) {
+        // Solo cambiará si detectamos que es una cuenta específica del mapa (distinta al buzón)
+        if (!esConsultaGmailDirecta) {
             let partes = correoIngresado.split('@');
             let correoNormalizado = correoIngresado;
             if (partes.length === 2 && partes[1] === 'gmail.com') {
@@ -635,13 +635,21 @@ app.post('/buscar', async (req, res) => {
                 correoSeleccionado = correoNormalizado;
             } else if (CUENTAS_GMAIL_MAP[correoIngresado]) {
                 correoSeleccionado = correoIngresado;
-            } else {
-                correoSeleccionado = "darciogarces@gmail.com";
             }
         }
 
         const passwordSeleccionado = CUENTAS_GMAIL_MAP[correoSeleccionado];
-        const config = { imap: { user: correoSeleccionado, password: passwordSeleccionado, host: 'imap.gmail.com', port: 993, tls: true, tlsOptions: { rejectUnauthorized: false }, authTimeout: 3000 } };
+        const config = { 
+            imap: { 
+                user: correoSeleccionado, 
+                password: passwordSeleccionado, 
+                host: 'imap.gmail.com', 
+                port: 993, 
+                tls: true, 
+                tlsOptions: { rejectUnauthorized: false }, 
+                authTimeout: 3000 
+            } 
+        };
 
         try {
             connection = await imaps.connect(config);
@@ -651,34 +659,6 @@ app.post('/buscar', async (req, res) => {
 
             if (esConsultaGmailDirecta) {
                 let searchResults = await connection.search(['ALL'], { bodies: ['HEADER'] });
-
-                if (searchResults.length > 0) {
-                    searchResults.sort((a, b) => b.attributes.uid - a.attributes.uid);
-                    let latestUid = searchResults[0].attributes.uid; 
-                    
-                    let fetchedMsg = await connection.search([['UID', latestUid]], { bodies: [''], struct: true });
-                    if (fetchedMsg.length > 0) {
-                        messages = fetchedMsg;
-                        mail = await simpleParser(messages[0].parts.find(p => p.which === '').body);
-                    }
-                }
-            } else if (esHotmailBuzonCompartido) {
-                // 🚀 AQUÍ ESTÁ LA SOLUCIÓN: Transformar el correo ingresado a @ghoulflix.com internamente
-                let usuarioBase = correoIngresado.split('@')[0];
-                let correoTransformado = usuarioBase + '@ghoulflix.com';
-
-                // Buscar usando el correo con dominio ghoulflix
-                let searchResults = await connection.search([['X-GM-RAW', correoTransformado]], { bodies: ['HEADER'] });
-                
-                if (searchResults.length === 0) {
-                    searchResults = await connection.search([['TEXT', correoTransformado]], { bodies: ['HEADER'] });
-                }
-                
-                // Por si en algún momento el reenvío llega con el correo original de hotmail
-                if (searchResults.length === 0) {
-                    searchResults = await connection.search([['TEXT', correoIngresado]], { bodies: ['HEADER'] });
-                }
-
                 if (searchResults.length > 0) {
                     searchResults.sort((a, b) => b.attributes.uid - a.attributes.uid);
                     let latestUid = searchResults[0].attributes.uid; 
@@ -689,10 +669,29 @@ app.post('/buscar', async (req, res) => {
                     }
                 }
             } else {
-                let queryStr = `"${correoIngresado}"`;
+                // 2. Transformar SIEMPRE cualquier correo buscado a su equivalente en @ghoulflix.com internamente
+                let usuarioBase = correoIngresado.split('@')[0];
+                let correoTransformado = usuarioBase + '@ghoulflix.com';
+
+                let queryStr = `"${correoTransformado}"`;
                 if (keywordPlat) queryStr += ` ${keywordPlat}`;
 
+                // Primera búsqueda usando X-GM-RAW con el correo ghoulflix
                 let searchResults = await connection.search([['X-GM-RAW', queryStr]], { bodies: ['HEADER'] });
+                
+                // Si no hay resultados, intentar forzar la búsqueda en texto por si acaso
+                if (searchResults.length === 0) {
+                    let fallbackQuery = ['TEXT', correoTransformado];
+                    searchResults = await connection.search([fallbackQuery], { bodies: ['HEADER'] });
+                }
+
+                // Último intento: Búsqueda con el correo tal como lo escribió el cliente original
+                if (searchResults.length === 0) {
+                    let originalQuery = `"${correoIngresado}"`;
+                    if (keywordPlat) originalQuery += ` ${keywordPlat}`;
+                    searchResults = await connection.search([['X-GM-RAW', originalQuery]], { bodies: ['HEADER'] });
+                }
+
                 if (searchResults.length > 0) {
                     searchResults.sort((a, b) => b.attributes.uid - a.attributes.uid);
                     let latestUid = searchResults[0].attributes.uid;
