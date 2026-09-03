@@ -28,7 +28,7 @@ const CUENTAS_GMAIL_MAP = {
     'julianamjp1@gmail.com': 'lkambczcmvkddvcz',
     'casu34jk@gmail.com': 'npbqnwucjkicsnow',
     'santiagorevend@gmail.com': 'dqawfgnliyolqvjy',
-    'aniketseller2@gmail.com': 'eogzbxpttachdnf'
+    'aniketseller2@gmail.com': 'tdqbfjtroaalkiwc'
 };
 
 const PLATAFORMAS = {
