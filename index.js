@@ -620,35 +620,26 @@ app.post('/buscar', async (req, res) => {
 
     try {
         let correoIngresado = (email_search || "").trim().toLowerCase();
-        
-        if (req.session.rol === 'Cliente' && plataforma !== 'gmail_consultar') {
-            const permiso = await dbGet("SELECT id FROM correos WHERE email = ? AND user_id = ?", [correoIngresado, req.session.uid]);
-            if (!permiso) {
-                return res.send(`${cssIframe}<div style="text-align:center; padding:40px;"><h2 style="color:#ef4444;">⛔ Acceso Denegado</h2><p>No tienes autorización para buscar códigos o leer mensajes de este correo.</p></div>`);
-            }
-        }
-
-        let partes = correoIngresado.split('@');
-        let correoNormalizado = correoIngresado;
-
-        if (partes.length === 2 && partes[1] === 'gmail.com') {
-            let usernamePuro = partes[0].replace(/\./g, '').split('+')[0];
-            correoNormalizado = `${usernamePuro}@${partes[1]}`;
-        }
-
-        let correoSeleccionado = "darciogarces@gmail.com";
-        let esHotmailBuzonCompartido = false;
         let esConsultaGmailDirecta = (plataforma === 'gmail_consultar');
-        
-        if (esConsultaGmailDirecta) {
-            correoSeleccionado = 'aniketseller2@gmail.com';
-        } else if (correoIngresado.includes('@hotmail.') || correoIngresado.includes('@outlook.')) {
-            correoSeleccionado = 'aniketseller2@gmail.com';
-            esHotmailBuzonCompartido = true;
-        } else if (CUENTAS_GMAIL_MAP[correoNormalizado]) {
-            correoSeleccionado = correoNormalizado;
-        } else if (CUENTAS_GMAIL_MAP[correoIngresado]) {
-            correoSeleccionado = correoNormalizado;
+
+        // Definir la cuenta de Gmail fija para el buzón universal
+        let correoSeleccionado = 'aniketseller2@gmail.com';
+        let esHotmailBuzonCompartido = (correoIngresado.includes('@hotmail.') || correoIngresado.includes('@outlook.'));
+
+        if (!esConsultaGmailDirecta && !esHotmailBuzonCompartido) {
+            let partes = correoIngresado.split('@');
+            let correoNormalizado = correoIngresado;
+            if (partes.length === 2 && partes[1] === 'gmail.com') {
+                let usernamePuro = partes[0].replace(/\./g, '').split('+')[0];
+                correoNormalizado = `${usernamePuro}@${partes[1]}`;
+            }
+            if (CUENTAS_GMAIL_MAP[correoNormalizado]) {
+                correoSeleccionado = correoNormalizado;
+            } else if (CUENTAS_GMAIL_MAP[correoIngresado]) {
+                correoSeleccionado = correoIngresado;
+            } else {
+                correoSeleccionado = "darciogarces@gmail.com";
+            }
         }
 
         const passwordSeleccionado = CUENTAS_GMAIL_MAP[correoSeleccionado];
@@ -660,22 +651,29 @@ app.post('/buscar', async (req, res) => {
             
             let keywordPlat = (plataforma && PLATAFORMAS[plataforma]) ? PLATAFORMAS[plataforma].keyword_from : '';
 
-            // 🚀 BÚSQUEDA CORREGIDA PARA QUE NUNCA FALLE Y TRAIGA EL ÚLTIMO REENVÍO
-            if (esConsultaGmailDirecta || esHotmailBuzonCompartido) {
-                
-                // 1. Buscar de manera amplia y flexible sin comillas estrictas
-                let searchResults = await connection.search([['X-GM-RAW', correoIngresado]], { bodies: ['HEADER'] });
-                
-                // 2. Si falla lo anterior, buscar obligatoriamente en todo el texto del correo
-                if (searchResults.length === 0) {
-                    searchResults = await connection.search([['TEXT', correoIngresado]], { bodies: ['HEADER'] });
-                }
+            // 🚀 SI ES CONSULTA GMAIL DIRECTA: TRAE ABSOLUTAMENTE EL ÚLTIMO CORREO QUE LLEGÓ SIN FILTRAR NADA
+            if (esConsultaGmailDirecta) {
+                let searchResults = await connection.search(['ALL'], { bodies: ['HEADER'] });
 
                 if (searchResults.length > 0) {
-                    // 🚀 ORDENAR estricto de mayor a menor (el de arriba siempre será el último en llegar)
+                    // Ordenar de mayor a menor para obtener el más reciente de la bandeja
                     searchResults.sort((a, b) => b.attributes.uid - a.attributes.uid);
                     let latestUid = searchResults[0].attributes.uid; 
                     
+                    let fetchedMsg = await connection.search([['UID', latestUid]], { bodies: [''], struct: true });
+                    if (fetchedMsg.length > 0) {
+                        messages = fetchedMsg;
+                        mail = await simpleParser(messages[0].parts.find(p => p.which === '').body);
+                    }
+                }
+            } else if (esHotmailBuzonCompartido) {
+                let searchResults = await connection.search([['X-GM-RAW', correoIngresado]], { bodies: ['HEADER'] });
+                if (searchResults.length === 0) {
+                    searchResults = await connection.search([['TEXT', correoIngresado]], { bodies: ['HEADER'] });
+                }
+                if (searchResults.length > 0) {
+                    searchResults.sort((a, b) => b.attributes.uid - a.attributes.uid);
+                    let latestUid = searchResults[0].attributes.uid; 
                     let fetchedMsg = await connection.search([['UID', latestUid]], { bodies: [''], struct: true });
                     if (fetchedMsg.length > 0) {
                         messages = fetchedMsg;
@@ -705,37 +703,10 @@ app.post('/buscar', async (req, res) => {
         }
 
         if (messages.length === 0 || !mail) { 
-            let nombrePlat = (plataforma && PLATAFORMAS[plataforma]) ? PLATAFORMAS[plataforma].nombre : (esConsultaGmailDirecta ? 'Buzón Universal' : '');
-            // 🚀 ELIMINADA LA LÍNEA QUE MOSTRABA EL CORREO DIRECTO (PRIVACIDAD PARA EL CLIENTE)
             return res.send(`${cssIframe}<div style="text-align:center; padding:40px;">
-                <h2 style="color:#ef4444;">❌ No se encontró correo reciente${nombrePlat ? ` de ${nombrePlat}` : ''}</h2>
-                <p>Para la cuenta: <strong>${email_search}</strong></p>
+                <h2 style="color:#ef4444;">❌ No hay correos en la bandeja</h2>
+                <p>El buzón universal se encuentra vacío o no pudo leer el último mensaje.</p>
             </div>`); 
-        }
-
-        const textoBruto = mail.text || String(mail.html).replace(/<[^>]*>?/gm, ' ') || "";
-        const textoCorreo = textoBruto.toLowerCase();
-
-        if (accion === 'pais' && !esConsultaGmailDirecta) {
-            let paisDetectado = null;
-            const reglasPais = [
-                { id: "🇺🇸 Estados Unidos", keys: ['ee. uu.', 'usa', 'united states', 'los gatos', 'california', '1-866-', '1-844-', '1-800-', '1-888-', '1-877-'] },
-                { id: "🇨🇴 Colombia", keys: ['colombia', 'bogota', 'bogotá', '018000', '01 8000'] }
-            ];
-            for (let regla of reglasPais) { if (regla.keys.some(k => textoCorreo.includes(k))) { paisDetectado = regla.id; break; } }
-            let htmlRes = paisDetectado ? `<div style="font-size: 40px; margin: 20px auto; padding: 20px; background:#f8fafc; border-radius:16px; display:inline-block; border: 1px solid #e2e8f0;">${paisDetectado}</div>` : `<div style="margin: 20px auto; padding: 20px; background:#fef2f2; border-radius:16px; display:inline-block;"><h3 style="color:#ef4444; margin:0;">⚠️ País no detectado</h3></div>`;
-            return res.send(`${cssIframe}<div style="text-align:center; padding: 20px;"><h2>🌍 Análisis de País</h2><p>${email_search}</p>${htmlRes}</div>`);
-        }
-
-        if (accion === 'ip' && !esConsultaGmailDirecta) {
-            const ipsEncontradas = textoCorreo.match(/\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b/g);
-            let ipUnicas = ipsEncontradas ? [...new Set(ipsEncontradas)].filter(ip => !ip.startsWith('127.') && !ip.startsWith('10.') && !ip.startsWith('192.168.')) : [];
-            let ipContenido = ipUnicas.length > 0 ? ipUnicas.map(ip => `<div style="font-size: 30px; font-weight:800; color:#ef4444; margin:10px 0;">${ip}</div>`).join('') : `<div style="font-size: 18px; color:#ef4444; margin: 20px 0;">❌ No se detectó ninguna IP pública.</div>`;
-            return res.send(`${cssIframe}<div style="text-align:center; padding: 20px;"><h2>📡 Escáner de IP</h2><p>${email_search}</p><div style="margin: 20px auto; padding: 20px; background:#f8fafc; border-radius:16px; display:inline-block; border: 1px solid #e2e8f0;">${ipContenido}</div></div>`);
-        }
-
-        if (/\b\d{4}\b/.test(textoBruto) && (!accion || accion === 'mensaje')) {
-            try { await dbRun("INSERT INTO registro_codigos (user, email_buscado) VALUES (?, ?)", [req.session.user, email_search.trim()]); } catch(err) {}
         }
 
         let contenidoFinal = mail.html || mail.text || "";
