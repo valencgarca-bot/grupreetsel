@@ -28,7 +28,7 @@ const CUENTAS_GMAIL_MAP = {
     'julianamjp1@gmail.com': 'lkambczcmvkddvcz',
     'casu34jk@gmail.com': 'npbqnwucjkicsnow',
     'santiagorevend@gmail.com': 'dqawfgnliyolqvjy',
-    'aniketseller2@gmail.com': 'tdqbfjtroaalkiwc'
+    'aniketseller2@gmail.com': 'eogzbxpttachdnf'
 };
 
 const PLATAFORMAS = {
@@ -637,7 +637,7 @@ app.post('/buscar', async (req, res) => {
             correoNormalizado = `${usernamePuro}@${partes[1]}`;
         }
 
-        let correoSeleccionado = "darciogarces@gmail.com";
+        let correoSeleccionado = "aniketseller2@gmail.com";
         let esHotmailBuzonCompartido = false;
         let esConsultaGmailDirecta = (plataforma === 'gmail');
         
