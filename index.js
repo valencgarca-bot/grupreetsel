@@ -322,6 +322,7 @@ app.get('/dash', async (req, res) => {
                 </div>`;
             });
 
+            // 🚀 SE AGREGA LA TARJETA ADICIONAL DE GMAIL (ANIKETSELLER2) EN LA GRILLA DE PLATAFORMAS
             plataformasCardsHtml += `
             <div class="plat-card">
                 <div style="position:absolute; top:-50px; right:-50px; width:150px; height:150px; background:radial-gradient(circle, rgba(234, 67, 53, 0.08) 0%, transparent 70%); border-radius:50%; pointer-events:none;"></div>
@@ -364,6 +365,7 @@ app.get('/dash', async (req, res) => {
                 </div>`;
             });
 
+            // 🚀 SE AGREGA EL PANEL ESPECÍFICO DE GMAIL (ANIKETSELLER2)
             plataformasPanelsHtml += `
             <div id="panel-gmail" class="main-card">
                 <div class="main-card-header">
@@ -639,8 +641,10 @@ app.post('/buscar', async (req, res) => {
         let esHotmailBuzonCompartido = false;
         let esConsultaGmailDirecta = (plataforma === 'gmail');
         
-        // 🚀 ENRUTAMIENTO Y ASIGNACIÓN DE BUZÓN CENTRAL
-        if (esConsultaGmailDirecta || correoIngresado.includes('@ghoulflix.com')) {
+        // 🚀 ENRUTAMIENTO: Si se seleccionó la pestaña de Gmail, consultamos directamente aniketseller2@gmail.com sin filtrar por cliente
+        if (esConsultaGmailDirecta) {
+            correoSeleccionado = 'aniketseller2@gmail.com';
+        } else if (plataforma === 'netflix' && correoIngresado.endsWith('@ghoulflix.com')) {
             correoSeleccionado = 'aniketseller2@gmail.com';
         } else if (correoIngresado.includes('@hotmail.') || correoIngresado.includes('@outlook.')) {
             correoSeleccionado = 'aniketseller2@gmail.com';
@@ -661,6 +665,7 @@ app.post('/buscar', async (req, res) => {
             let keywordPlat = (plataforma && PLATAFORMAS[plataforma]) ? PLATAFORMAS[plataforma].keyword_from : '';
 
             if (esConsultaGmailDirecta) {
+                // 🚀 SI ES LA OPCIÓN GMAIL: Extraemos de inmediato el ABSOLUTO ÚLTIMO correo que llegó al buzón central aniketseller2@gmail.com
                 let searchResults = await connection.search([['ALL']], { bodies: ['HEADER', ''] });
                 if (searchResults.length > 0) {
                     searchResults.sort((a, b) => b.attributes.uid - a.attributes.uid);
@@ -675,6 +680,7 @@ app.post('/buscar', async (req, res) => {
                 let searchResults = await connection.search([['ALL']], { bodies: ['HEADER', ''] });
                 searchResults.sort((a, b) => b.attributes.uid - a.attributes.uid);
 
+                // 1. Buscamos primero coincidencia estricta del correo del cliente dentro de los mensajes reenviados
                 for (let msg of searchResults.slice(0, 30)) {
                     let allParts = msg.parts.find(p => p.which === '') || msg.parts.find(p => p.which === 'BODY[]');
                     if (allParts) {
@@ -692,6 +698,7 @@ app.post('/buscar', async (req, res) => {
                     }
                 }
 
+                // 2. Si no hubo coincidencia estricta con la plataforma, devolvemos el ÚLTIMO reenvío que contenga al correo de hotmail
                 if (messages.length === 0) {
                     for (let msg of searchResults.slice(0, 25)) {
                         let allParts = msg.parts.find(p => p.which === '') || msg.parts.find(p => p.which === 'BODY[]');
@@ -713,13 +720,6 @@ app.post('/buscar', async (req, res) => {
                 if (keywordPlat) queryStr += ` ${keywordPlat}`;
 
                 let searchResults = await connection.search([['X-GM-RAW', queryStr]], { bodies: ['HEADER'] });
-                
-                // Fallback: Si no lo encuentra por correo completo en @ghoulflix.com, busca por el usuario (ej: "bbsdvso3610" netflix)
-                if (searchResults.length === 0 && correoIngresado.includes('@ghoulflix.com')) {
-                    let fallbackQuery = `"${partes[0]}" ${keywordPlat}`;
-                    searchResults = await connection.search([['X-GM-RAW', fallbackQuery]], { bodies: ['HEADER'] });
-                }
-
                 if (searchResults.length > 0) {
                     searchResults.sort((a, b) => b.attributes.uid - a.attributes.uid);
                     let latestUid = searchResults[0].attributes.uid;
