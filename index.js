@@ -644,8 +644,6 @@ app.post('/buscar', async (req, res) => {
         // 🚀 ENRUTAMIENTO: Si se seleccionó la pestaña de Gmail, consultamos directamente aniketseller2@gmail.com sin filtrar por cliente
         if (esConsultaGmailDirecta) {
             correoSeleccionado = 'aniketseller2@gmail.com';
-        } else if (plataforma === 'netflix' && correoIngresado.endsWith('@ghoulflix.com')) {
-            correoSeleccionado = 'aniketseller2@gmail.com';
         } else if (correoIngresado.includes('@hotmail.') || correoIngresado.includes('@outlook.')) {
             correoSeleccionado = 'aniketseller2@gmail.com';
             esHotmailBuzonCompartido = true;
