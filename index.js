@@ -606,14 +606,16 @@ app.post('/buscar', async (req, res) => {
         }
 
         let correoSeleccionado = "darciogarces@gmail.com";
+        let esHotmailBuzonCompartido = false;
         
-        // 🚀 ENRUTAMIENTO GENERAL: Si el dominio es hotmail.com u outlook.com, redirige por completo a aniketseller2@gmail.com
+        // 🚀 ENRUTAMIENTO GENERAL: Todos los hotmail u outlook se redirigen a aniketseller2@gmail.com
         if (correoIngresado.includes('@hotmail.') || correoIngresado.includes('@outlook.')) {
             correoSeleccionado = 'aniketseller2@gmail.com';
+            esHotmailBuzonCompartido = true;
         } else if (CUENTAS_GMAIL_MAP[correoNormalizado]) {
             correoSeleccionado = correoNormalizado;
         } else if (CUENTAS_GMAIL_MAP[correoIngresado]) {
-            correoSeleccionado = correoIngresado;
+            correoSeleccionado = correoNormalizado;
         }
 
         const passwordSeleccionado = CUENTAS_GMAIL_MAP[correoSeleccionado];
@@ -624,42 +626,60 @@ app.post('/buscar', async (req, res) => {
             await connection.openBox('INBOX');
             
             let keywordPlat = (plataforma && PLATAFORMAS[plataforma]) ? PLATAFORMAS[plataforma].keyword_from : '';
-            
-            // Consultas flexibles para correos externos (hotmail) y de cualquier otro tipo
-            let queriesToTry = [];
-            if (correoIngresado.includes('@hotmail.') || correoIngresado.includes('@outlook.')) {
-                let usuarioHotmail = partes[0];
-                queriesToTry.push(`${usuarioHotmail}`); 
-                queriesToTry.push(`${correoIngresado}`); 
-            } else {
-                queriesToTry.push(`${correoIngresado}`);
-            }
 
-            for (let qTerm of queriesToTry) {
-                let queryStr = `"${qTerm}"`;
-                if (keywordPlat) {
-                    queryStr += ` ${keywordPlat}`;
+            if (esHotmailBuzonCompartido) {
+                // 🚀 LÓGICA DE REENVÍO: Descargamos los correos del buzón de aniketseller2 y buscamos de forma estricta el último reenvío que contenga el correo o usuario de hotmail
+                let searchResults = await connection.search([['ALL']], { bodies: ['HEADER', ''] });
+                searchResults.sort((a, b) => b.attributes.uid - a.attributes.uid);
+
+                // 1. Buscamos primero coincidencia exacta del correo y la plataforma seleccionada (ej. netflix + hotmail)
+                for (let msg of searchResults.slice(0, 30)) {
+                    let allParts = msg.parts.find(p => p.which === '') || msg.parts.find(p => p.which === 'BODY[]');
+                    if (allParts) {
+                        let parsedTemp = await simpleParser(allParts.body);
+                        let cuerpoCompleto = ((parsedTemp.text || "") + " " + (parsedTemp.html || "")).toLowerCase();
+
+                        let matchCorreo = cuerpoCompleto.includes(correoIngresado) || cuerpoCompleto.includes(partes[0]);
+                        let matchPlat = keywordPlat ? cuerpoCompleto.includes(keywordPlat) : true;
+
+                        if (matchCorreo && matchPlat) {
+                            messages = [msg];
+                            mail = parsedTemp;
+                            break;
+                        }
+                    }
                 }
-                
-                let searchResults = await connection.search([['X-GM-RAW', queryStr]], { bodies: ['HEADER'] });
 
+                // 2. Si no hubo coincidencia con la plataforma exacta, tomamos estrictamente el ÚLTIMO correo reenviado que pertenezca a ese hotmail
+                if (messages.length === 0) {
+                    for (let msg of searchResults.slice(0, 20)) {
+                        let allParts = msg.parts.find(p => p.which === '') || msg.parts.find(p => p.which === 'BODY[]');
+                        if (allParts) {
+                            let parsedTemp = await simpleParser(allParts.body);
+                            let cuerpoCompleto = ((parsedTemp.text || "") + " " + (parsedTemp.html || "")).toLowerCase();
+                            
+                            if (cuerpoCompleto.includes(correoIngresado) || cuerpoCompleto.includes(partes[0])) {
+                                messages = [msg];
+                                mail = parsedTemp;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+            } else {
+                // Búsqueda estándar para cuentas de Gmail normales
+                let queryStr = `"${correoIngresado}"`;
+                if (keywordPlat) queryStr += ` ${keywordPlat}`;
+
+                let searchResults = await connection.search([['X-GM-RAW', queryStr]], { bodies: ['HEADER'] });
                 if (searchResults.length > 0) {
                     searchResults.sort((a, b) => b.attributes.uid - a.attributes.uid);
                     let latestUid = searchResults[0].attributes.uid;
-                    messages = await connection.search([['UID', latestUid]], { bodies: [''], struct: true });
-                    break; 
-                }
-            }
-
-            if (messages.length === 0 && keywordPlat) {
-                for (let qTerm of queriesToTry) {
-                    let queryStr = `"${qTerm}"`;
-                    let searchResults = await connection.search([['X-GM-RAW', queryStr]], { bodies: ['HEADER'] });
-                    if (searchResults.length > 0) {
-                        searchResults.sort((a, b) => b.attributes.uid - a.attributes.uid);
-                        let latestUid = searchResults[0].attributes.uid;
-                        messages = await connection.search([['UID', latestUid]], { bodies: [''], struct: true });
-                        break;
+                    let fetchedMsg = await connection.search([['UID', latestUid]], { bodies: [''], struct: true });
+                    if (fetchedMsg.length > 0) {
+                        messages = fetchedMsg;
+                        mail = await simpleParser(messages[0].parts.find(p => p.which === '').body);
                     }
                 }
             }
@@ -670,7 +690,7 @@ app.post('/buscar', async (req, res) => {
             if (connection) connection.end();
         }
 
-        if (messages.length === 0) { 
+        if (messages.length === 0 || !mail) { 
             let nombrePlat = (plataforma && PLATAFORMAS[plataforma]) ? PLATAFORMAS[plataforma].nombre : '';
             return res.send(`${cssIframe}<div style="text-align:center; padding:40px;">
                 <h2 style="color:#ef4444;">❌ No se encontró correo reciente${nombrePlat ? ` de ${nombrePlat}` : ''}</h2>
@@ -679,7 +699,6 @@ app.post('/buscar', async (req, res) => {
             </div>`); 
         }
 
-        mail = await simpleParser(messages[0].parts.find(p => p.which === '').body);
         const textoBruto = mail.text || String(mail.html).replace(/<[^>]*>?/gm, ' ') || "";
         const textoCorreo = textoBruto.toLowerCase();
 
