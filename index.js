@@ -607,8 +607,8 @@ app.post('/buscar', async (req, res) => {
 
         let correoSeleccionado = "darciogarces@gmail.com";
         
-        // Asignación directa a la cuenta receptora de Hotmail
-        if (correoIngresado.includes('@hotmail.')) {
+        // 🚀 ENRUTAMIENTO GENERAL: Si el dominio es hotmail.com u outlook.com, redirige por completo a aniketseller2@gmail.com
+        if (correoIngresado.includes('@hotmail.') || correoIngresado.includes('@outlook.')) {
             correoSeleccionado = 'aniketseller2@gmail.com';
         } else if (CUENTAS_GMAIL_MAP[correoNormalizado]) {
             correoSeleccionado = correoNormalizado;
@@ -623,22 +623,48 @@ app.post('/buscar', async (req, res) => {
             connection = await imaps.connect(config);
             await connection.openBox('INBOX');
             
-            // ⚠️ MODIFICACIÓN CLAVE: Buscamos el correo en cualquier parte del cuerpo/título, no solo en "to:"
-            let queryStr = `"${correoIngresado}"`;
+            let keywordPlat = (plataforma && PLATAFORMAS[plataforma]) ? PLATAFORMAS[plataforma].keyword_from : '';
             
-            if (plataforma && PLATAFORMAS[plataforma]) {
-                queryStr += ` from:${PLATAFORMAS[plataforma].keyword_from}`;
-            }
-
-            let searchResults = await connection.search([['X-GM-RAW', queryStr]], { bodies: ['HEADER'] });
-
-            if (searchResults.length > 0) {
-                searchResults.sort((a, b) => b.attributes.uid - a.attributes.uid);
-                let latestUid = searchResults[0].attributes.uid;
-                messages = await connection.search([['UID', latestUid]], { bodies: [''], struct: true });
+            // Consultas flexibles para correos externos (hotmail) y de cualquier otro tipo
+            let queriesToTry = [];
+            if (correoIngresado.includes('@hotmail.') || correoIngresado.includes('@outlook.')) {
+                let usuarioHotmail = partes[0];
+                queriesToTry.push(`${usuarioHotmail}`); 
+                queriesToTry.push(`${correoIngresado}`); 
             } else {
-                connection.end();
+                queriesToTry.push(`${correoIngresado}`);
             }
+
+            for (let qTerm of queriesToTry) {
+                let queryStr = `"${qTerm}"`;
+                if (keywordPlat) {
+                    queryStr += ` ${keywordPlat}`;
+                }
+                
+                let searchResults = await connection.search([['X-GM-RAW', queryStr]], { bodies: ['HEADER'] });
+
+                if (searchResults.length > 0) {
+                    searchResults.sort((a, b) => b.attributes.uid - a.attributes.uid);
+                    let latestUid = searchResults[0].attributes.uid;
+                    messages = await connection.search([['UID', latestUid]], { bodies: [''], struct: true });
+                    break; 
+                }
+            }
+
+            if (messages.length === 0 && keywordPlat) {
+                for (let qTerm of queriesToTry) {
+                    let queryStr = `"${qTerm}"`;
+                    let searchResults = await connection.search([['X-GM-RAW', queryStr]], { bodies: ['HEADER'] });
+                    if (searchResults.length > 0) {
+                        searchResults.sort((a, b) => b.attributes.uid - a.attributes.uid);
+                        let latestUid = searchResults[0].attributes.uid;
+                        messages = await connection.search([['UID', latestUid]], { bodies: [''], struct: true });
+                        break;
+                    }
+                }
+            }
+
+            connection.end();
         } catch (err) {
             console.log(`⚠️ Error IMAP con ${correoSeleccionado}:`, err.message);
             if (connection) connection.end();
@@ -654,7 +680,6 @@ app.post('/buscar', async (req, res) => {
         }
 
         mail = await simpleParser(messages[0].parts.find(p => p.which === '').body);
-        connection.end();
         const textoBruto = mail.text || String(mail.html).replace(/<[^>]*>?/gm, ' ') || "";
         const textoCorreo = textoBruto.toLowerCase();
 
