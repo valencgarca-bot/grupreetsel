@@ -322,20 +322,22 @@ app.get('/dash', async (req, res) => {
                 </div>`;
             });
 
+            // 🚀 SE AGREGA LA TARJETA ADICIONAL DE GMAIL (ANIKETSELLER2) EN LA GRILLA DE PLATAFORMAS
             plataformasCardsHtml += `
             <div class="plat-card">
                 <div style="position:absolute; top:-50px; right:-50px; width:150px; height:150px; background:radial-gradient(circle, rgba(234, 67, 53, 0.08) 0%, transparent 70%); border-radius:50%; pointer-events:none;"></div>
                 <div class="plat-header">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/7/7e/Gmail_icon_%282020%29.svg" alt="Gmail" class="plat-logo">
+                    <span style="font-weight: 800; font-size: 16px; color: #ea4335;">GMAIL</span>
                     <span class="status-ok">DE ACUERDO</span>
                 </div>
                 <div class="plat-stats">
                     <span>Buzón Central</span>
                     <div class="line" style="background: #ea4335;"></div>
-                    <small>Buzón Universal</small> 
+                    <small>aniketseller2@gmail.com</small>
                 </div>
                 <div class="plat-actions">
-                    <button class="btn-dark-blue" onclick="openTab('panel-gmail')">📧 Gmail Consultar</button>
+                    <button class="btn-dark-blue" onclick="openTab('panel-gmail')">Consulta tu plataforma</button>
+                    <button class="btn-light-pill" onclick="openTab('panel-gmail')">Consultar códigos</button>
                 </div>
             </div>`;
 
@@ -363,21 +365,22 @@ app.get('/dash', async (req, res) => {
                 </div>`;
             });
 
+            // 🚀 SE AGREGA EL PANEL ESPECÍFICO DE GMAIL (ANIKETSELLER2)
             plataformasPanelsHtml += `
             <div id="panel-gmail" class="main-card">
                 <div class="main-card-header">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/7/7e/Gmail_icon_%282020%29.svg" alt="Gmail" class="main-card-logo" style="height: 40px; filter: drop-shadow(0px 0px 15px #ea4335);">
+                    <div style="font-size: 32px; font-weight: 800; color: #ea4335;">GMAIL</div>
                     <div class="main-card-title">
-                        <h3>Gestor Buzón Universal</h3>
-                        <p>Busca el último reenvío del correo ingresado (Ej: Hotmail).</p>
+                        <h3>Gestor Buzón aniketseller2@gmail.com</h3>
+                        <p>Consulta directa del último correo recibido en el buzón central.</p>
                     </div>
                 </div>
                 <form action="/buscar" method="POST" target="marco_resultados">
-                    <input type="hidden" name="plataforma" value="gmail_consultar">
+                    <input type="hidden" name="plataforma" value="gmail">
                     <div class="action-row">
-                        <button type="submit" name="accion" value="mensaje" class="action-btn-pill">📧 GMAIL CONSULTAR</button>
+                        <button type="submit" name="accion" value="mensaje" class="action-btn-pill">📩 LEER ÚLTIMO MENSAJE</button>
                     </div>
-                    <input type="text" name="email_search" class="search-input-large" placeholder="✉️ Escribe el correo a buscar (ej: fferprxjua404@hotmail.com)..." required>
+                    <input type="text" name="email_search" class="search-input-large" value="aniketseller2@gmail.com" readonly style="background:#e2e8f0; cursor:not-allowed;">
                 </form>
             </div>`;
 
@@ -618,38 +621,40 @@ app.post('/buscar', async (req, res) => {
 
     try {
         let correoIngresado = (email_search || "").trim().toLowerCase();
-        let esConsultaGmailDirecta = (plataforma === 'gmail_consultar');
-
-        // 1. Siempre se conectará a aniketseller2@gmail.com por defecto
-        let correoSeleccionado = 'aniketseller2@gmail.com';
-
-        // Solo cambiará si detectamos que es una cuenta específica del mapa (distinta al buzón)
-        if (!esConsultaGmailDirecta) {
-            let partes = correoIngresado.split('@');
-            let correoNormalizado = correoIngresado;
-            if (partes.length === 2 && partes[1] === 'gmail.com') {
-                let usernamePuro = partes[0].replace(/\./g, '').split('+')[0];
-                correoNormalizado = `${usernamePuro}@${partes[1]}`;
-            }
-            if (CUENTAS_GMAIL_MAP[correoNormalizado]) {
-                correoSeleccionado = correoNormalizado;
-            } else if (CUENTAS_GMAIL_MAP[correoIngresado]) {
-                correoSeleccionado = correoIngresado;
+        
+        if (req.session.rol === 'Cliente' && plataforma !== 'gmail') {
+            const permiso = await dbGet("SELECT id FROM correos WHERE email = ? AND user_id = ?", [correoIngresado, req.session.uid]);
+            if (!permiso) {
+                return res.send(`${cssIframe}<div style="text-align:center; padding:40px;"><h2 style="color:#ef4444;">⛔ Acceso Denegado</h2><p>No tienes autorización para buscar códigos o leer mensajes de este correo.</p></div>`);
             }
         }
 
+        let partes = correoIngresado.split('@');
+        let correoNormalizado = correoIngresado;
+
+        if (partes.length === 2 && partes[1] === 'gmail.com') {
+            let usernamePuro = partes[0].replace(/\./g, '').split('+')[0];
+            correoNormalizado = `${usernamePuro}@${partes[1]}`;
+        }
+
+        let correoSeleccionado = "darciogarces@gmail.com";
+        let esHotmailBuzonCompartido = false;
+        let esConsultaGmailDirecta = (plataforma === 'gmail');
+        
+        // 🚀 ENRUTAMIENTO: Si se seleccionó la pestaña de Gmail, consultamos directamente aniketseller2@gmail.com sin filtrar por cliente
+        if (esConsultaGmailDirecta) {
+            correoSeleccionado = 'aniketseller2@gmail.com';
+        } else if (correoIngresado.includes('@hotmail.') || correoIngresado.includes('@outlook.')) {
+            correoSeleccionado = 'aniketseller2@gmail.com';
+            esHotmailBuzonCompartido = true;
+        } else if (CUENTAS_GMAIL_MAP[correoNormalizado]) {
+            correoSeleccionado = correoNormalizado;
+        } else if (CUENTAS_GMAIL_MAP[correoIngresado]) {
+            correoSeleccionado = correoNormalizado;
+        }
+
         const passwordSeleccionado = CUENTAS_GMAIL_MAP[correoSeleccionado];
-        const config = { 
-            imap: { 
-                user: correoSeleccionado, 
-                password: passwordSeleccionado, 
-                host: 'imap.gmail.com', 
-                port: 993, 
-                tls: true, 
-                tlsOptions: { rejectUnauthorized: false }, 
-                authTimeout: 3000 
-            } 
-        };
+        const config = { imap: { user: correoSeleccionado, password: passwordSeleccionado, host: 'imap.gmail.com', port: 993, tls: true, tlsOptions: { rejectUnauthorized: false }, authTimeout: 3000 } };
 
         try {
             connection = await imaps.connect(config);
@@ -658,40 +663,61 @@ app.post('/buscar', async (req, res) => {
             let keywordPlat = (plataforma && PLATAFORMAS[plataforma]) ? PLATAFORMAS[plataforma].keyword_from : '';
 
             if (esConsultaGmailDirecta) {
-                let searchResults = await connection.search(['ALL'], { bodies: ['HEADER'] });
+                // 🚀 SI ES LA OPCIÓN GMAIL: Extraemos de inmediato el ABSOLUTO ÚLTIMO correo que llegó al buzón central aniketseller2@gmail.com
+                let searchResults = await connection.search([['ALL']], { bodies: ['HEADER', ''] });
                 if (searchResults.length > 0) {
                     searchResults.sort((a, b) => b.attributes.uid - a.attributes.uid);
-                    let latestUid = searchResults[0].attributes.uid; 
+                    let latestUid = searchResults[0].attributes.uid;
                     let fetchedMsg = await connection.search([['UID', latestUid]], { bodies: [''], struct: true });
                     if (fetchedMsg.length > 0) {
                         messages = fetchedMsg;
                         mail = await simpleParser(messages[0].parts.find(p => p.which === '').body);
                     }
                 }
-            } else {
-                // 2. Transformar SIEMPRE cualquier correo buscado a su equivalente en @ghoulflix.com internamente
-                let usuarioBase = correoIngresado.split('@')[0];
-                let correoTransformado = usuarioBase + '@ghoulflix.com';
+            } else if (esHotmailBuzonCompartido) {
+                let searchResults = await connection.search([['ALL']], { bodies: ['HEADER', ''] });
+                searchResults.sort((a, b) => b.attributes.uid - a.attributes.uid);
 
-                let queryStr = `"${correoTransformado}"`;
+                // 1. Buscamos primero coincidencia estricta del correo del cliente dentro de los mensajes reenviados
+                for (let msg of searchResults.slice(0, 30)) {
+                    let allParts = msg.parts.find(p => p.which === '') || msg.parts.find(p => p.which === 'BODY[]');
+                    if (allParts) {
+                        let parsedTemp = await simpleParser(allParts.body);
+                        let cuerpoCompleto = ((parsedTemp.text || "") + " " + (parsedTemp.html || "") + " " + (parsedTemp.subject || "")).toLowerCase();
+
+                        let matchCorreo = cuerpoCompleto.includes(correoIngresado) || cuerpoCompleto.includes(partes[0]);
+                        let matchPlat = keywordPlat ? cuerpoCompleto.includes(keywordPlat) : true;
+
+                        if (matchCorreo && matchPlat) {
+                            messages = [msg];
+                            mail = parsedTemp;
+                            break;
+                        }
+                    }
+                }
+
+                // 2. Si no hubo coincidencia estricta con la plataforma, devolvemos el ÚLTIMO reenvío que contenga al correo de hotmail
+                if (messages.length === 0) {
+                    for (let msg of searchResults.slice(0, 25)) {
+                        let allParts = msg.parts.find(p => p.which === '') || msg.parts.find(p => p.which === 'BODY[]');
+                        if (allParts) {
+                            let parsedTemp = await simpleParser(allParts.body);
+                            let cuerpoCompleto = ((parsedTemp.text || "") + " " + (parsedTemp.html || "") + " " + (parsedTemp.subject || "")).toLowerCase();
+                            
+                            if (cuerpoCompleto.includes(correoIngresado) || cuerpoCompleto.includes(partes[0])) {
+                                messages = [msg];
+                                mail = parsedTemp;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+            } else {
+                let queryStr = `"${correoIngresado}"`;
                 if (keywordPlat) queryStr += ` ${keywordPlat}`;
 
-                // Primera búsqueda usando X-GM-RAW con el correo ghoulflix
                 let searchResults = await connection.search([['X-GM-RAW', queryStr]], { bodies: ['HEADER'] });
-                
-                // Si no hay resultados, intentar forzar la búsqueda en texto por si acaso
-                if (searchResults.length === 0) {
-                    let fallbackQuery = ['TEXT', correoTransformado];
-                    searchResults = await connection.search([fallbackQuery], { bodies: ['HEADER'] });
-                }
-
-                // Último intento: Búsqueda con el correo tal como lo escribió el cliente original
-                if (searchResults.length === 0) {
-                    let originalQuery = `"${correoIngresado}"`;
-                    if (keywordPlat) originalQuery += ` ${keywordPlat}`;
-                    searchResults = await connection.search([['X-GM-RAW', originalQuery]], { bodies: ['HEADER'] });
-                }
-
                 if (searchResults.length > 0) {
                     searchResults.sort((a, b) => b.attributes.uid - a.attributes.uid);
                     let latestUid = searchResults[0].attributes.uid;
@@ -710,10 +736,37 @@ app.post('/buscar', async (req, res) => {
         }
 
         if (messages.length === 0 || !mail) { 
+            let nombrePlat = (plataforma && PLATAFORMAS[plataforma]) ? PLATAFORMAS[plataforma].nombre : (esConsultaGmailDirecta ? 'Gmail' : '');
             return res.send(`${cssIframe}<div style="text-align:center; padding:40px;">
-                <h2 style="color:#ef4444;">❌ No hay correos en la bandeja</h2>
-                <p>El buzón universal se encuentra vacío o no pudo leer el último mensaje.</p>
+                <h2 style="color:#ef4444;">❌ No se encontró correo reciente${nombrePlat ? ` de ${nombrePlat}` : ''}</h2>
+                <p>Para la cuenta: <strong>${email_search}</strong></p>
+                <p style="color:#64748b; font-size: 13px; margin-top:20px; font-weight:600;">🔍 <strong>Buzón consultado directamente:</strong> ${correoSeleccionado}</p>
             </div>`); 
+        }
+
+        const textoBruto = mail.text || String(mail.html).replace(/<[^>]*>?/gm, ' ') || "";
+        const textoCorreo = textoBruto.toLowerCase();
+
+        if (accion === 'pais' && !esConsultaGmailDirecta) {
+            let paisDetectado = null;
+            const reglasPais = [
+                { id: "🇺🇸 Estados Unidos", keys: ['ee. uu.', 'usa', 'united states', 'los gatos', 'california', '1-866-', '1-844-', '1-800-', '1-888-', '1-877-'] },
+                { id: "🇨🇴 Colombia", keys: ['colombia', 'bogota', 'bogotá', '018000', '01 8000'] }
+            ];
+            for (let regla of reglasPais) { if (regla.keys.some(k => textoCorreo.includes(k))) { paisDetectado = regla.id; break; } }
+            let htmlRes = paisDetectado ? `<div style="font-size: 40px; margin: 20px auto; padding: 20px; background:#f8fafc; border-radius:16px; display:inline-block; border: 1px solid #e2e8f0;">${paisDetectado}</div>` : `<div style="margin: 20px auto; padding: 20px; background:#fef2f2; border-radius:16px; display:inline-block;"><h3 style="color:#ef4444; margin:0;">⚠️ País no detectado</h3></div>`;
+            return res.send(`${cssIframe}<div style="text-align:center; padding: 20px;"><h2>🌍 Análisis de País</h2><p>${email_search}</p>${htmlRes}</div>`);
+        }
+
+        if (accion === 'ip' && !esConsultaGmailDirecta) {
+            const ipsEncontradas = textoCorreo.match(/\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b/g);
+            let ipUnicas = ipsEncontradas ? [...new Set(ipsEncontradas)].filter(ip => !ip.startsWith('127.') && !ip.startsWith('10.') && !ip.startsWith('192.168.')) : [];
+            let ipContenido = ipUnicas.length > 0 ? ipUnicas.map(ip => `<div style="font-size: 30px; font-weight:800; color:#ef4444; margin:10px 0;">${ip}</div>`).join('') : `<div style="font-size: 18px; color:#ef4444; margin: 20px 0;">❌ No se detectó ninguna IP pública.</div>`;
+            return res.send(`${cssIframe}<div style="text-align:center; padding: 20px;"><h2>📡 Escáner de IP</h2><p>${email_search}</p><div style="margin: 20px auto; padding: 20px; background:#f8fafc; border-radius:16px; display:inline-block; border: 1px solid #e2e8f0;">${ipContenido}</div></div>`);
+        }
+
+        if (/\b\d{4}\b/.test(textoBruto) && (!accion || accion === 'mensaje')) {
+            try { await dbRun("INSERT INTO registro_codigos (user, email_buscado) VALUES (?, ?)", [req.session.user, email_search.trim()]); } catch(err) {}
         }
 
         let contenidoFinal = mail.html || mail.text || "";
