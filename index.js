@@ -620,13 +620,20 @@ app.post('/buscar', async (req, res) => {
     const cssIframe = `<style>body { font-family: 'Inter', sans-serif; background: #ffffff; color: #0f172a; padding: 20px; margin: 0; }</style>`;
 
     try {
-        let correoIngresado = (email_search || "").trim().toLowerCase();
+        let correoIngresadoOriginal = (email_search || "").trim().toLowerCase();
+        let correoIngresado = correoIngresadoOriginal;
         
         if (req.session.rol === 'Cliente' && plataforma !== 'gmail') {
-            const permiso = await dbGet("SELECT id FROM correos WHERE email = ? AND user_id = ?", [correoIngresado, req.session.uid]);
+            const permiso = await dbGet("SELECT id FROM correos WHERE email = ? AND user_id = ?", [correoIngresadoOriginal, req.session.uid]);
             if (!permiso) {
                 return res.send(`${cssIframe}<div style="text-align:center; padding:40px;"><h2 style="color:#ef4444;">⛔ Acceso Denegado</h2><p>No tienes autorización para buscar códigos o leer mensajes de este correo.</p></div>`);
             }
+        }
+
+        let eraHotmail = false;
+        if (correoIngresado.endsWith('@hotmail.com')) {
+            correoIngresado = correoIngresado.replace('@hotmail.com', '@ghoulflix.com');
+            eraHotmail = true; 
         }
 
         let partes = correoIngresado.split('@');
@@ -641,10 +648,9 @@ app.post('/buscar', async (req, res) => {
         let esHotmailBuzonCompartido = false;
         let esConsultaGmailDirecta = (plataforma === 'gmail');
         
-        // 🚀 ENRUTAMIENTO: Si se seleccionó la pestaña de Gmail, consultamos directamente aniketseller2@gmail.com sin filtrar por cliente
         if (esConsultaGmailDirecta) {
             correoSeleccionado = 'aniketseller2@gmail.com';
-        } else if (correoIngresado.includes('@hotmail.') || correoIngresado.includes('@outlook.')) {
+        } else if (eraHotmail || correoIngresado.includes('@ghoulflix.') || correoIngresado.includes('@outlook.')) {
             correoSeleccionado = 'aniketseller2@gmail.com';
             esHotmailBuzonCompartido = true;
         } else if (CUENTAS_GMAIL_MAP[correoNormalizado]) {
@@ -663,7 +669,6 @@ app.post('/buscar', async (req, res) => {
             let keywordPlat = (plataforma && PLATAFORMAS[plataforma]) ? PLATAFORMAS[plataforma].keyword_from : '';
 
             if (esConsultaGmailDirecta) {
-                // 🚀 SI ES LA OPCIÓN GMAIL: Extraemos de inmediato el ABSOLUTO ÚLTIMO correo que llegó al buzón central aniketseller2@gmail.com
                 let searchResults = await connection.search([['ALL']], { bodies: ['HEADER', ''] });
                 if (searchResults.length > 0) {
                     searchResults.sort((a, b) => b.attributes.uid - a.attributes.uid);
@@ -678,7 +683,6 @@ app.post('/buscar', async (req, res) => {
                 let searchResults = await connection.search([['ALL']], { bodies: ['HEADER', ''] });
                 searchResults.sort((a, b) => b.attributes.uid - a.attributes.uid);
 
-                // 1. Buscamos primero coincidencia estricta del correo del cliente dentro de los mensajes reenviados
                 for (let msg of searchResults.slice(0, 30)) {
                     let allParts = msg.parts.find(p => p.which === '') || msg.parts.find(p => p.which === 'BODY[]');
                     if (allParts) {
@@ -696,7 +700,6 @@ app.post('/buscar', async (req, res) => {
                     }
                 }
 
-                // 2. Si no hubo coincidencia estricta con la plataforma, devolvemos el ÚLTIMO reenvío que contenga al correo de hotmail
                 if (messages.length === 0) {
                     for (let msg of searchResults.slice(0, 25)) {
                         let allParts = msg.parts.find(p => p.which === '') || msg.parts.find(p => p.which === 'BODY[]');
