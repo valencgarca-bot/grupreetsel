@@ -637,7 +637,7 @@ app.post('/buscar', async (req, res) => {
             correoNormalizado = `${usernamePuro}@${partes[1]}`;
         }
 
-        let correoSeleccionado = "aniketseller2@gmail.com";
+        let correoSeleccionado = "darciogarces@gmail.com";
         let esHotmailBuzonCompartido = false;
         let esConsultaGmailDirecta = (plataforma === 'gmail');
         
