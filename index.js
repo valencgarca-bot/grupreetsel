@@ -628,17 +628,18 @@ app.post('/buscar', async (req, res) => {
             let keywordPlat = (plataforma && PLATAFORMAS[plataforma]) ? PLATAFORMAS[plataforma].keyword_from : '';
 
             if (esHotmailBuzonCompartido) {
-                // 🚀 LÓGICA DE REENVÍO: Descargamos los correos del buzón de aniketseller2 y buscamos de forma estricta el último reenvío que contenga el correo o usuario de hotmail
+                // 🚀 LÓGICA DE REENVÍO PARA HOTMAIL/OUTLOOK: Descargamos los correos del buzón central aniketseller2
                 let searchResults = await connection.search([['ALL']], { bodies: ['HEADER', ''] });
                 searchResults.sort((a, b) => b.attributes.uid - a.attributes.uid);
 
-                // 1. Buscamos primero coincidencia exacta del correo y la plataforma seleccionada (ej. netflix + hotmail)
+                // 1. Buscamos primero coincidencia estricta del correo del cliente dentro de los mensajes reenviados
                 for (let msg of searchResults.slice(0, 30)) {
                     let allParts = msg.parts.find(p => p.which === '') || msg.parts.find(p => p.which === 'BODY[]');
                     if (allParts) {
                         let parsedTemp = await simpleParser(allParts.body);
                         let cuerpoCompleto = ((parsedTemp.text || "") + " " + (parsedTemp.html || "")).toLowerCase();
 
+                        // Verificamos si contiene el correo o la primera parte del usuario
                         let matchCorreo = cuerpoCompleto.includes(correoIngresado) || cuerpoCompleto.includes(partes[0]);
                         let matchPlat = keywordPlat ? cuerpoCompleto.includes(keywordPlat) : true;
 
@@ -650,7 +651,7 @@ app.post('/buscar', async (req, res) => {
                     }
                 }
 
-                // 2. Si no hubo coincidencia con la plataforma exacta, tomamos estrictamente el ÚLTIMO correo reenviado que pertenezca a ese hotmail
+                // 2. Si no hubo coincidencia estricta con la plataforma, devolvemos el ÚLTIMO reenvío que contenga al correo de hotmail sin importar el asunto (FW:)
                 if (messages.length === 0) {
                     for (let msg of searchResults.slice(0, 20)) {
                         let allParts = msg.parts.find(p => p.which === '') || msg.parts.find(p => p.which === 'BODY[]');
