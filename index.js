@@ -31,7 +31,7 @@ const CUENTAS_GMAIL_MAP = {
     'julianamjp1@gmail.com': 'lkambczcmvkddvcz',
     'casu34jk@gmail.com': 'npbqnwucjkicsnow',
     'santiagorevend@gmail.com': 'dqawfgnliyolqvjy',
-    'aniketseller2@gmail.com': 'iauaerevstwvibdi'
+    'aniketseller2@gmail.com': 'eogzbxpttachdnf'
 };
 
 // 🚀 SISTEMA ESCALABLE DE PLATAFORMAS
@@ -607,6 +607,7 @@ app.post('/buscar', async (req, res) => {
 
         let correoSeleccionado = "darciogarces@gmail.com";
         
+        // Asignación directa a la cuenta receptora de Hotmail
         if (correoIngresado.includes('@hotmail.')) {
             correoSeleccionado = 'aniketseller2@gmail.com';
         } else if (CUENTAS_GMAIL_MAP[correoNormalizado]) {
@@ -622,7 +623,9 @@ app.post('/buscar', async (req, res) => {
             connection = await imaps.connect(config);
             await connection.openBox('INBOX');
             
-            let queryStr = `to:${correoIngresado}`;
+            // ⚠️ MODIFICACIÓN CLAVE: Buscamos el correo en cualquier parte del cuerpo/título, no solo en "to:"
+            let queryStr = `"${correoIngresado}"`;
+            
             if (plataforma && PLATAFORMAS[plataforma]) {
                 queryStr += ` from:${PLATAFORMAS[plataforma].keyword_from}`;
             }
@@ -646,6 +649,7 @@ app.post('/buscar', async (req, res) => {
             return res.send(`${cssIframe}<div style="text-align:center; padding:40px;">
                 <h2 style="color:#ef4444;">❌ No se encontró correo reciente${nombrePlat ? ` de ${nombrePlat}` : ''}</h2>
                 <p>Para la cuenta: <strong>${email_search}</strong></p>
+                <p style="color:#64748b; font-size: 13px; margin-top:20px; font-weight:600;">🔍 <strong>Buzón consultado directamente:</strong> ${correoSeleccionado}</p>
             </div>`); 
         }
 
