@@ -322,7 +322,6 @@ app.get('/dash', async (req, res) => {
                 </div>`;
             });
 
-            // 🚀 SE AGREGA LA TARJETA ADICIONAL DE GMAIL (ANIKETSELLER2) EN LA GRILLA DE PLATAFORMAS
             plataformasCardsHtml += `
             <div class="plat-card">
                 <div style="position:absolute; top:-50px; right:-50px; width:150px; height:150px; background:radial-gradient(circle, rgba(234, 67, 53, 0.08) 0%, transparent 70%); border-radius:50%; pointer-events:none;"></div>
@@ -365,7 +364,6 @@ app.get('/dash', async (req, res) => {
                 </div>`;
             });
 
-            // 🚀 SE AGREGA EL PANEL ESPECÍFICO DE GMAIL (ANIKETSELLER2)
             plataformasPanelsHtml += `
             <div id="panel-gmail" class="main-card">
                 <div class="main-card-header">
@@ -620,20 +618,13 @@ app.post('/buscar', async (req, res) => {
     const cssIframe = `<style>body { font-family: 'Inter', sans-serif; background: #ffffff; color: #0f172a; padding: 20px; margin: 0; }</style>`;
 
     try {
-        let correoIngresadoOriginal = (email_search || "").trim().toLowerCase();
-        let correoIngresado = correoIngresadoOriginal;
+        let correoIngresado = (email_search || "").trim().toLowerCase();
         
         if (req.session.rol === 'Cliente' && plataforma !== 'gmail') {
-            const permiso = await dbGet("SELECT id FROM correos WHERE email = ? AND user_id = ?", [correoIngresadoOriginal, req.session.uid]);
+            const permiso = await dbGet("SELECT id FROM correos WHERE email = ? AND user_id = ?", [correoIngresado, req.session.uid]);
             if (!permiso) {
                 return res.send(`${cssIframe}<div style="text-align:center; padding:40px;"><h2 style="color:#ef4444;">⛔ Acceso Denegado</h2><p>No tienes autorización para buscar códigos o leer mensajes de este correo.</p></div>`);
             }
-        }
-
-        let eraHotmail = false;
-        if (correoIngresado.endsWith('@hotmail.com')) {
-            correoIngresado = correoIngresado.replace('@hotmail.com', '@ghoulflix.com');
-            eraHotmail = true; 
         }
 
         let partes = correoIngresado.split('@');
@@ -648,9 +639,10 @@ app.post('/buscar', async (req, res) => {
         let esHotmailBuzonCompartido = false;
         let esConsultaGmailDirecta = (plataforma === 'gmail');
         
-        if (esConsultaGmailDirecta) {
+        // 🚀 ENRUTAMIENTO Y ASIGNACIÓN DE BUZÓN CENTRAL
+        if (esConsultaGmailDirecta || correoIngresado.includes('@ghoulflix.com')) {
             correoSeleccionado = 'aniketseller2@gmail.com';
-        } else if (eraHotmail || correoIngresado.includes('@ghoulflix.') || correoIngresado.includes('@outlook.')) {
+        } else if (correoIngresado.includes('@hotmail.') || correoIngresado.includes('@outlook.')) {
             correoSeleccionado = 'aniketseller2@gmail.com';
             esHotmailBuzonCompartido = true;
         } else if (CUENTAS_GMAIL_MAP[correoNormalizado]) {
@@ -721,6 +713,13 @@ app.post('/buscar', async (req, res) => {
                 if (keywordPlat) queryStr += ` ${keywordPlat}`;
 
                 let searchResults = await connection.search([['X-GM-RAW', queryStr]], { bodies: ['HEADER'] });
+                
+                // Fallback: Si no lo encuentra por correo completo en @ghoulflix.com, busca por el usuario (ej: "bbsdvso3610" netflix)
+                if (searchResults.length === 0 && correoIngresado.includes('@ghoulflix.com')) {
+                    let fallbackQuery = `"${partes[0]}" ${keywordPlat}`;
+                    searchResults = await connection.search([['X-GM-RAW', fallbackQuery]], { bodies: ['HEADER'] });
+                }
+
                 if (searchResults.length > 0) {
                     searchResults.sort((a, b) => b.attributes.uid - a.attributes.uid);
                     let latestUid = searchResults[0].attributes.uid;
