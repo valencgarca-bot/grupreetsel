@@ -6,7 +6,6 @@ const { simpleParser } = require('mailparser');
 const path = require('path');
 const app = express();
 
-// Habilitamos la carpeta "public" por si luego quieres subir tus propias imágenes
 app.use(express.static('public'));
 
 const dbPath = path.resolve(__dirname, 'betflix_mexico_v1.db');
@@ -294,7 +293,7 @@ app.use(async (req, res, next) => {
 });
 
 // ==========================================
-// RUTA LOGIN - DISEÑO CYBERPUNK / GLASSMORPHISM COMPLETO
+// RUTA LOGIN - CON FONDO PELÍCULAS Y ANIMACIONES DISNEY
 // ==========================================
 app.get('/', (req, res) => {
     res.send(`
@@ -308,9 +307,11 @@ app.get('/', (req, res) => {
             @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Inter:wght@400;500;600&display=swap');
 
             body {
-                /* Fondo de collage de películas directamente desde internet */
-                background: url('https://i.imgur.com/3f8H5qZ.jpg') no-repeat center center fixed;
+                background-color: #0f172a;
+                background-image: url('https://wallpapers.com/images/hd/netflix-background-02e05zrmte75d4y9.jpg');
                 background-size: cover;
+                background-position: center;
+                background-attachment: fixed;
                 font-family: 'Inter', sans-serif;
                 display: flex;
                 justify-content: center;
@@ -324,7 +325,7 @@ app.get('/', (req, res) => {
                 content: "";
                 position: absolute;
                 top: 0; left: 0; width: 100%; height: 100%;
-                background: rgba(0, 0, 0, 0.5);
+                background: rgba(0, 0, 0, 0.65);
                 z-index: -1;
             }
 
@@ -413,19 +414,21 @@ app.get('/', (req, res) => {
                 align-items: center;
             }
 
-            .input-group svg {
+            .input-group img.animated-icon {
                 position: absolute;
-                left: 20px;
-                width: 18px;
-                height: 18px;
-                fill: #94a3b8;
+                left: 15px;
+                width: 28px;
+                height: 28px;
                 z-index: 2;
                 pointer-events: none;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.1);
+                padding: 2px;
             }
 
             .input-group input {
                 width: 100%;
-                padding: 14px 20px 14px 50px;
+                padding: 14px 20px 14px 55px;
                 border-radius: 50px;
                 border: 1px solid rgba(255,255,255,0.3);
                 background: rgba(0, 0, 0, 0.4);
@@ -490,11 +493,11 @@ app.get('/', (req, res) => {
                 
                 <form action="/login" method="POST">
                     <div class="input-group">
-                        <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                        <img src="https://media.tenor.com/mO_C4524wWkAAAAi/stitch-dance.gif" class="animated-icon" alt="Stitch Disney">
                         <input name="user" placeholder="dueño" required>
                     </div>
                     <div class="input-group">
-                        <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+                        <img src="https://media.tenor.com/8m1f7p7p4WAAAAAi/mickey-mouse-disney.gif" class="animated-icon" alt="Mickey Mouse">
                         <input type="password" name="pass" placeholder="••••••••" required>
                     </div>
                     <button type="submit">Iniciar Sesión</button>
@@ -998,7 +1001,6 @@ app.post('/buscar', async (req, res) => {
 
         const messages = resultadoExitoso.messages;
         const mail = resultadoExitoso.mail;
-        const correoSeleccionado = resultadoExitoso.buzón;
 
         const textoBruto = mail.text || String(mail.html).replace(/<[^>]*>?/gm, ' ') || "";
         const textoCorreo = textoBruto.toLowerCase();
