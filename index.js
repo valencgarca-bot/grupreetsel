@@ -293,7 +293,7 @@ app.use(async (req, res, next) => {
 });
 
 // ==========================================
-// RUTA LOGIN - DISEÑO ESTILO NETFLIX
+// RUTA LOGIN - DISEÑO MODERNO 2026 (GLASSMORPHISM)
 // ==========================================
 app.get('/', (req, res) => {
     res.send(`
@@ -304,47 +304,48 @@ app.get('/', (req, res) => {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Acceso - stremin gunpreetsel</title>
         <style>
-            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap');
 
             body {
                 margin: 0;
                 padding: 0;
                 font-family: 'Inter', sans-serif;
-                /* El fondo original que ya tenías es el mosaico de películas exacto */
-                background-image: url('https://wallpapers.com/images/hd/netflix-background-02e05zrmte75d4y9.jpg');
+                /* Fondo cinematográfico estable alojado en Unsplash */
+                background-image: url('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');
                 background-size: cover;
                 background-position: center;
                 background-attachment: fixed;
                 height: 100vh;
                 display: flex;
                 flex-direction: column;
+                background-color: #000; /* Color de respaldo */
             }
 
-            /* Sombreado perimetral clásico de Netflix */
+            /* Sombreado perimetral y viñeta profunda */
             .overlay {
                 position: absolute;
                 top: 0; left: 0; width: 100%; height: 100%;
-                background: rgba(0, 0, 0, 0.4);
-                background-image: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0, rgba(0, 0, 0, 0.2) 60%, rgba(0, 0, 0, 0.8) 100%);
+                background: radial-gradient(circle at center, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.85) 100%);
                 z-index: 1;
             }
 
             .header {
                 position: relative;
                 z-index: 2;
-                padding: 24px 5%;
+                padding: 30px 5%;
                 display: flex;
                 justify-content: flex-start;
             }
 
+            /* Logotipo moderno con resplandor en lugar de sombra dura */
             .brand {
                 color: #E50914;
-                font-size: 40px;
+                font-size: 38px;
                 font-weight: 800;
                 text-transform: uppercase;
-                letter-spacing: 1px;
+                letter-spacing: -0.5px;
                 text-decoration: none;
-                text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+                text-shadow: 0 0 25px rgba(229, 9, 20, 0.4);
             }
 
             .login-container {
@@ -357,89 +358,103 @@ app.get('/', (req, res) => {
                 padding: 20px;
             }
 
+            /* Panel Glassmorphism 2026 */
             .login-box {
-                background: rgba(0, 0, 0, 0.75);
-                border-radius: 4px;
-                padding: 60px 68px 40px;
+                background: rgba(15, 23, 42, 0.65); /* Tono pizarra oscuro transparente */
+                backdrop-filter: blur(16px);
+                -webkit-backdrop-filter: blur(16px);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                border-radius: 20px;
+                padding: 50px 60px;
                 width: 100%;
-                max-width: 314px;
-                box-sizing: content-box;
+                max-width: 340px;
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+                box-sizing: border-box;
             }
 
             .login-box h2 {
-                color: #fff;
-                font-size: 32px;
-                font-weight: 700;
+                color: #ffffff;
+                font-size: 28px;
+                font-weight: 800;
                 margin-top: 0;
-                margin-bottom: 28px;
+                margin-bottom: 30px;
+                letter-spacing: -0.5px;
             }
 
             .input-group {
                 position: relative;
-                margin-bottom: 16px;
-                background: #333;
-                border-radius: 4px;
+                margin-bottom: 20px;
             }
 
+            /* Inputs oscuros y modernos */
             .input-group input {
                 width: 100%;
-                background: transparent;
-                border: 0;
-                color: #fff;
-                height: 50px;
-                padding: 16px 20px 0;
+                background: rgba(0, 0, 0, 0.4);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                color: #ffffff;
+                height: 56px;
+                padding: 20px 16px 4px;
                 box-sizing: border-box;
                 font-size: 15px;
+                border-radius: 12px;
                 outline: none;
+                transition: all 0.3s ease;
             }
 
-            /* Etiquetas con animación flotante */
+            /* Efecto al seleccionar el input */
+            .input-group input:focus {
+                background: rgba(0, 0, 0, 0.6);
+                border-color: #E50914;
+                box-shadow: 0 0 0 3px rgba(229, 9, 20, 0.15);
+            }
+
+            /* Etiquetas flotantes estilizadas */
             .input-group label {
                 position: absolute;
-                left: 20px;
+                left: 16px;
                 top: 50%;
                 transform: translateY(-50%);
-                color: #8c8c8c;
+                color: #94a3b8;
                 font-size: 15px;
-                transition: 0.1s ease-out;
+                transition: all 0.2s ease;
                 pointer-events: none;
             }
 
             .input-group input:focus + label,
             .input-group input:valid + label {
-                top: 14px;
+                top: 16px;
                 font-size: 11px;
                 font-weight: 600;
+                color: #cbd5e1;
             }
 
-            .input-group input:focus {
-                background: #454545;
-                border-radius: 4px;
-            }
-
+            /* Botón con degradado sutil */
             .btn-submit {
                 width: 100%;
-                background: #E50914;
-                color: #fff;
+                background: linear-gradient(135deg, #E50914 0%, #b80710 100%);
+                color: #ffffff;
                 font-size: 16px;
                 font-weight: 700;
                 padding: 16px;
                 border: none;
-                border-radius: 4px;
+                border-radius: 12px;
                 cursor: pointer;
-                margin-top: 24px;
-                transition: 0.2s;
+                margin-top: 10px;
+                transition: transform 0.2s, box-shadow 0.2s;
+                box-shadow: 0 4px 15px rgba(229, 9, 20, 0.3);
             }
 
             .btn-submit:hover {
-                background: #f40612;
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(229, 9, 20, 0.4);
             }
 
             .help-text {
-                color: #737373;
+                color: #64748b;
                 font-size: 13px;
-                margin-top: 80px;
-                line-height: 1.5;
+                margin-top: 40px;
+                line-height: 1.6;
+                text-align: center;
             }
         </style>
     </head>
@@ -447,7 +462,6 @@ app.get('/', (req, res) => {
         <div class="overlay"></div>
         
         <header class="header">
-            <!-- El nombre de la plataforma posicionado como el logo -->
             <div class="brand">stremin gunpreetsel</div>
         </header>
         
@@ -464,11 +478,11 @@ app.get('/', (req, res) => {
                         <input type="password" name="pass" required>
                         <label>Contraseña</label>
                     </div>
-                    <button type="submit" class="btn-submit">Iniciar Sesión</button>
+                    <button type="submit" class="btn-submit">Ingresar</button>
                 </form>
                 
                 <div class="help-text">
-                    El acceso al Panel Central está protegido para garantizar la seguridad de la plataforma.
+                    Acceso cifrado. Panel Central protegido para la seguridad de la plataforma.
                 </div>
             </div>
         </div>
