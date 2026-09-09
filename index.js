@@ -293,7 +293,7 @@ app.use(async (req, res, next) => {
 });
 
 // ==========================================
-// RUTA LOGIN - CON FONDO PELÍCULAS Y ANIMACIONES DISNEY
+// RUTA LOGIN - DISEÑO ESTILO NETFLIX
 // ==========================================
 app.get('/', (req, res) => {
     res.send(`
@@ -304,204 +304,172 @@ app.get('/', (req, res) => {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Acceso - stremin gunpreetsel</title>
         <style>
-            @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Inter:wght@400;500;600&display=swap');
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
             body {
-                background-color: #0f172a;
+                margin: 0;
+                padding: 0;
+                font-family: 'Inter', sans-serif;
+                /* El fondo original que ya tenías es el mosaico de películas exacto */
                 background-image: url('https://wallpapers.com/images/hd/netflix-background-02e05zrmte75d4y9.jpg');
                 background-size: cover;
                 background-position: center;
                 background-attachment: fixed;
-                font-family: 'Inter', sans-serif;
+                height: 100vh;
+                display: flex;
+                flex-direction: column;
+            }
+
+            /* Sombreado perimetral clásico de Netflix */
+            .overlay {
+                position: absolute;
+                top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0, 0, 0, 0.4);
+                background-image: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0, rgba(0, 0, 0, 0.2) 60%, rgba(0, 0, 0, 0.8) 100%);
+                z-index: 1;
+            }
+
+            .header {
+                position: relative;
+                z-index: 2;
+                padding: 24px 5%;
+                display: flex;
+                justify-content: flex-start;
+            }
+
+            .brand {
+                color: #E50914;
+                font-size: 40px;
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                text-decoration: none;
+                text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            }
+
+            .login-container {
+                position: relative;
+                z-index: 2;
+                flex: 1;
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                height: 100vh;
-                margin: 0;
-                overflow: hidden;
-            }
-
-            body::before {
-                content: "";
-                position: absolute;
-                top: 0; left: 0; width: 100%; height: 100%;
-                background: rgba(0, 0, 0, 0.65);
-                z-index: -1;
-            }
-
-            .login-wrapper {
-                position: relative;
-                padding: 2px;
-                border-radius: 22px;
-                background: linear-gradient(135deg, #00d2ff 0%, rgba(255,255,255,0.1) 50%, #ff3a3a 100%);
-                box-shadow: 0 0 20px rgba(0, 210, 255, 0.3), 0 0 20px rgba(255, 58, 58, 0.3);
+                padding: 20px;
             }
 
             .login-box {
-                background: rgba(20, 25, 35, 0.7);
-                backdrop-filter: blur(12px);
-                -webkit-backdrop-filter: blur(12px);
-                padding: 50px 40px 40px 40px;
-                border-radius: 20px;
-                text-align: center;
+                background: rgba(0, 0, 0, 0.75);
+                border-radius: 4px;
+                padding: 60px 68px 40px;
                 width: 100%;
-                max-width: 340px;
-                box-sizing: border-box;
-                position: relative;
-            }
-
-            .screw {
-                position: absolute;
-                width: 8px; height: 8px;
-                background: radial-gradient(circle, #cbd5e1, #475569);
-                border-radius: 50%;
-                box-shadow: inset 1px 1px 2px rgba(255,255,255,0.4), 0 1px 3px rgba(0,0,0,0.8);
-            }
-            .screw::after {
-                content: ""; position: absolute;
-                top: 50%; left: 50%; width: 70%; height: 1.5px;
-                background: rgba(0,0,0,0.6);
-                transform: translate(-50%, -50%) rotate(45deg);
-            }
-            .screw.tl { top: 15px; left: 15px; }
-            .screw.tr { top: 15px; right: 15px; transform: rotate(20deg); }
-            .screw.bl { bottom: 15px; left: 15px; transform: rotate(-15deg); }
-            .screw.br { bottom: 15px; right: 15px; transform: rotate(80deg); }
-
-            .logo-badge {
-                position: absolute;
-                top: -35px;
-                left: 50%;
-                transform: translateX(-50%);
-                width: 70px; height: 70px;
-                background: linear-gradient(135deg, #1e293b, #0f172a);
-                border: 2px solid #94a3b8;
-                border-radius: 50%;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                box-shadow: 0 8px 20px rgba(0,0,0,0.6), inset 0 2px 5px rgba(255,255,255,0.2);
-                z-index: 10;
-            }
-            .logo-badge svg {
-                width: 32px; height: 32px;
-                fill: #e2e8f0;
-                filter: drop-shadow(0 0 5px rgba(255,255,255,0.3));
+                max-width: 314px;
+                box-sizing: content-box;
             }
 
             .login-box h2 {
-                color: #ffffff;
-                font-family: 'Orbitron', sans-serif;
-                font-size: 20px;
-                text-transform: uppercase;
-                letter-spacing: 2px;
-                margin: 10px 0 5px 0;
-                text-shadow: 0 0 10px rgba(255, 120, 120, 0.6);
-                line-height: 1.3;
-            }
-
-            .login-box p {
-                color: #94a3b8;
-                font-size: 12px;
-                margin-bottom: 30px;
-                letter-spacing: 0.5px;
+                color: #fff;
+                font-size: 32px;
+                font-weight: 700;
+                margin-top: 0;
+                margin-bottom: 28px;
             }
 
             .input-group {
                 position: relative;
-                margin-bottom: 15px;
-                display: flex;
-                align-items: center;
-            }
-
-            .input-group img.animated-icon {
-                position: absolute;
-                left: 15px;
-                width: 28px;
-                height: 28px;
-                z-index: 2;
-                pointer-events: none;
-                border-radius: 50%;
-                background: rgba(255, 255, 255, 0.1);
-                padding: 2px;
+                margin-bottom: 16px;
+                background: #333;
+                border-radius: 4px;
             }
 
             .input-group input {
                 width: 100%;
-                padding: 14px 20px 14px 55px;
-                border-radius: 50px;
-                border: 1px solid rgba(255,255,255,0.3);
-                background: rgba(0, 0, 0, 0.4);
-                color: white;
+                background: transparent;
+                border: 0;
+                color: #fff;
+                height: 50px;
+                padding: 16px 20px 0;
                 box-sizing: border-box;
-                font-family: 'Orbitron', sans-serif;
-                font-size: 13px;
+                font-size: 15px;
                 outline: none;
-                transition: 0.3s;
-                box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
-                text-align: center;
             }
-            
-            .input-group input::placeholder { 
-                color: #cbd5e1; 
-                letter-spacing: 1px;
+
+            /* Etiquetas con animación flotante */
+            .input-group label {
+                position: absolute;
+                left: 20px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: #8c8c8c;
+                font-size: 15px;
+                transition: 0.1s ease-out;
+                pointer-events: none;
+            }
+
+            .input-group input:focus + label,
+            .input-group input:valid + label {
+                top: 14px;
+                font-size: 11px;
+                font-weight: 600;
             }
 
             .input-group input:focus {
-                border-color: #00d2ff;
-                box-shadow: inset 0 2px 10px rgba(0,0,0,0.5), 0 0 10px rgba(0, 210, 255, 0.3);
+                background: #454545;
+                border-radius: 4px;
             }
 
-            button {
+            .btn-submit {
                 width: 100%;
-                padding: 14px;
-                border-radius: 50px;
-                border: 1px solid #00d2ff;
-                background: linear-gradient(135deg, rgba(30,41,59,0.8), rgba(15,23,42,0.9));
-                color: #e2e8f0;
-                font-weight: 600;
-                font-size: 14px;
+                background: #E50914;
+                color: #fff;
+                font-size: 16px;
+                font-weight: 700;
+                padding: 16px;
+                border: none;
+                border-radius: 4px;
                 cursor: pointer;
-                font-family: 'Inter', sans-serif;
-                transition: 0.3s;
-                box-shadow: inset 0 0 10px rgba(0, 210, 255, 0.2), 0 4px 15px rgba(0,0,0,0.4);
-                margin-top: 10px;
+                margin-top: 24px;
+                transition: 0.2s;
             }
 
-            button:hover {
-                background: linear-gradient(135deg, rgba(30,41,59,1), #00d2ff);
-                color: #fff;
-                transform: scale(1.02);
-                box-shadow: 0 0 20px rgba(0, 210, 255, 0.5);
+            .btn-submit:hover {
+                background: #f40612;
+            }
+
+            .help-text {
+                color: #737373;
+                font-size: 13px;
+                margin-top: 80px;
+                line-height: 1.5;
             }
         </style>
     </head>
     <body>
-        <div class="login-wrapper">
-            <div class="logo-badge">
-                <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-            </div>
-            
+        <div class="overlay"></div>
+        
+        <header class="header">
+            <!-- El nombre de la plataforma posicionado como el logo -->
+            <div class="brand">stremin gunpreetsel</div>
+        </header>
+        
+        <div class="login-container">
             <div class="login-box">
-                <div class="screw tl"></div>
-                <div class="screw tr"></div>
-                <div class="screw bl"></div>
-                <div class="screw br"></div>
-                
-                <h2>stremin<br>gunpreetsel</h2>
-                <p>Acceso al Panel Central</p>
+                <h2>Iniciar Sesión</h2>
                 
                 <form action="/login" method="POST">
                     <div class="input-group">
-                        <img src="https://media.tenor.com/mO_C4524wWkAAAAi/stitch-dance.gif" class="animated-icon" alt="Stitch Disney">
-                        <input name="user" placeholder="dueño" required>
+                        <input type="text" name="user" required>
+                        <label>Usuario (dueño)</label>
                     </div>
                     <div class="input-group">
-                        <img src="https://media.tenor.com/8m1f7p7p4WAAAAAi/mickey-mouse-disney.gif" class="animated-icon" alt="Mickey Mouse">
-                        <input type="password" name="pass" placeholder="••••••••" required>
+                        <input type="password" name="pass" required>
+                        <label>Contraseña</label>
                     </div>
-                    <button type="submit">Iniciar Sesión</button>
+                    <button type="submit" class="btn-submit">Iniciar Sesión</button>
                 </form>
+                
+                <div class="help-text">
+                    El acceso al Panel Central está protegido para garantizar la seguridad de la plataforma.
+                </div>
             </div>
         </div>
     </body>
