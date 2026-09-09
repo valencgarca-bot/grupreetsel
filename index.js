@@ -6,6 +6,9 @@ const { simpleParser } = require('mailparser');
 const path = require('path');
 const app = express();
 
+// Habilitamos la carpeta "public" para leer la imagen de fondo
+app.use(express.static('public'));
+
 const dbPath = path.resolve(__dirname, 'betflix_mexico_v1.db');
 const db = new sqlite3.Database(dbPath, (err) => {
     if (err) {
@@ -102,6 +105,7 @@ const CSS_MODERNO = `
     .user-pill .info strong { color: var(--text-dark); font-weight: 700; }
     .user-pill .info span { color: var(--text-muted); font-size: 11px; }
 
+    /* AQUI SE CAMBIO EL NOMBRE DEL DASHBOARD */
     .brand-logo { font-size: 22px; font-weight: 800; display:flex; align-items:center; gap: 8px; letter-spacing: -0.5px; text-transform: uppercase;}
     .brand-logo .icon { color: #10b981; }
 
@@ -212,7 +216,6 @@ const CSS_MODERNO = `
     .input-classic { width: 100%; padding: 15px; margin-bottom: 15px; border-radius: 12px; border: 1px solid var(--border-soft); background: var(--btn-light); font-family: 'Inter', sans-serif; box-sizing: border-box;}
     .btn-submit { background: var(--btn-dark); color: white; border: none; padding: 15px; border-radius: 12px; font-weight: 700; cursor: pointer; width: 100%; }
 
-    /* ESTILOS AÑADIDOS PARA SUGERENCIA DE DOMINIO */
     .sugerencia-dominio {
         background: #1e293b;
         color: white;
@@ -291,17 +294,71 @@ app.use(async (req, res, next) => {
     } else { return res.redirect('/'); }
 });
 
+// ==========================================
+// RUTA LOGIN CON EL NUEVO DISEÑO
+// ==========================================
 app.get('/', (req, res) => {
     res.send(`
     <style>
-        body { background: #f4f6f9; font-family: 'Inter', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .login-box { background: white; padding: 40px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; width: 100%; max-width: 350px; }
-        input { width: 100%; padding: 15px; margin-bottom: 15px; border-radius: 50px; border: 1px solid #e2e8f0; background: #f1f5f9; box-sizing: border-box; text-align: center; font-family: 'Inter', sans-serif; outline: none; }
-        button { width: 100%; padding: 15px; border-radius: 50px; border: none; background: #1e293b; color: white; font-weight: bold; cursor: pointer; font-family: 'Inter', sans-serif; }
+        body { 
+            /* AQUI CARGA TU IMAGEN DESDE LA CARPETA PUBLIC */
+            background: url('/fondo.jpg') no-repeat center center fixed; 
+            background-size: cover;
+            font-family: 'Inter', sans-serif; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+        }
+        /* Capa oscura semitransparente sobre el fondo para que resalte la caja */
+        body::before {
+            content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.4); z-index: -1;
+        }
+        /* Diseño Glassmorphism (Cristal) */
+        .login-box { 
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 40px; 
+            border-radius: 24px; 
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); 
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center; 
+            width: 100%; 
+            max-width: 350px; 
+        }
+        .login-box h2 {
+            color: #ffffff;
+            font-size: 26px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 0;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+        .login-box p {
+            color: #cbd5e1;
+        }
+        input { 
+            width: 100%; padding: 15px; margin-bottom: 15px; border-radius: 50px; 
+            border: 1px solid rgba(255,255,255,0.3); background: rgba(0,0,0,0.5); 
+            color: white; box-sizing: border-box; text-align: center; 
+            font-family: 'Inter', sans-serif; outline: none; 
+        }
+        input::placeholder { color: #94a3b8; }
+        button { 
+            width: 100%; padding: 15px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.4); 
+            background: linear-gradient(135deg, #1e293b, #0f172a); color: white; 
+            font-weight: bold; cursor: pointer; font-family: 'Inter', sans-serif; transition: 0.3s; 
+        }
+        button:hover { 
+            background: #334155; transform: scale(1.02); box-shadow: 0 0 15px rgba(255,255,255,0.2); 
+        }
     </style>
     <div class="login-box">
-        <h2 style="margin-top:0;">⚡ PLATAFORMAS STREAMING</h2>
-        <p style="color:#64748b; font-size:14px; margin-bottom:30px;">Acceso al Panel Central</p>
+        <h2 style="margin-top:0;">⚡ stremin gunpreetsel</h2>
+        <p style="font-size:14px; margin-bottom:30px;">Acceso al Panel Central</p>
         <form action="/login" method="POST">
             <input name="user" placeholder="Usuario" required>
             <input type="password" name="pass" placeholder="Contraseña" required>
@@ -508,7 +565,7 @@ app.get('/dash', async (req, res) => {
                     </div>
                 </div>
                 
-                <div class="brand-logo"><span class="icon">⚡</span> PLATAFORMAS STREAMING</div>
+                <div class="brand-logo"><span class="icon">⚡</span> stremin gunpreetsel</div>
                 
                 <div class="search-top">
                     <input type="text" placeholder="Buscar correo general...">
@@ -660,9 +717,6 @@ app.post('/admin/eliminar-usuario', async (req, res) => {
     } catch(err) { res.redirect('/dash'); }
 });
 
-// ==========================================
-// NUEVA LÓGICA DE BÚSQUEDA ABSTRAÍDA IMAP
-// ==========================================
 async function buscarEnBuzonImap(correoBuzon, correoIngresado, plataforma, partes) {
     const passwordSeleccionado = CUENTAS_GMAIL_MAP[correoBuzon];
     if (!passwordSeleccionado) return null;
@@ -748,9 +802,6 @@ async function buscarEnBuzonImap(correoBuzon, correoIngresado, plataforma, parte
     }
 }
 
-// ==========================================
-// RUTA MODIFICADA: MULTI-BÚSQUEDA 
-// ==========================================
 app.post('/buscar', async (req, res) => {
     const { email_search, accion, plataforma } = req.body;
     const cssIframe = `<style>body { font-family: 'Inter', sans-serif; background: #ffffff; color: #0f172a; padding: 20px; margin: 0; }</style>`;
@@ -777,28 +828,22 @@ app.post('/buscar', async (req, res) => {
         let buzonesAbuscar = [];
         let esConsultaGmailDirecta = (plataforma === 'gmail');
         
-        // CONDICIÓN PRINCIPAL DEL DOMINIO
         if (esConsultaGmailDirecta) {
             buzonesAbuscar = ['aniketseller2@gmail.com'];
         } else if (dominio === 'gmail.com') {
-            // Lógica intacta: solo en el buzón de Gmail que corresponda
             let buzonAsignado = "darciogarces@gmail.com";
             if (CUENTAS_GMAIL_MAP[correoNormalizado]) buzonAsignado = correoNormalizado;
             else if (CUENTAS_GMAIL_MAP[correoIngresado]) buzonAsignado = correoNormalizado;
             buzonesAbuscar = [buzonAsignado];
         } else {
-            // Nueva lógica universal: Todo lo que no sea Gmail, se busca en ambos.
             buzonesAbuscar = ['darciogarces@gmail.com', 'aniketseller2@gmail.com'];
         }
 
         let resultadoExitoso = null;
 
         try {
-            // Ejecutamos las búsquedas de forma paralela
             const promesas = buzonesAbuscar.map(buzon => buscarEnBuzonImap(buzon, correoIngresado, plataforma, partes));
             const resultados = await Promise.all(promesas);
-            
-            // Encontramos el primero que nos haya devuelto el correo (es decir, que no sea null)
             resultadoExitoso = resultados.find(res => res !== null);
         } catch (error) {
             console.error("Error en búsqueda paralela:", error);
@@ -813,7 +858,6 @@ app.post('/buscar', async (req, res) => {
             </div>`); 
         }
 
-        // Asignamos la información recuperada del buzón exitoso a las variables originales
         const messages = resultadoExitoso.messages;
         const mail = resultadoExitoso.mail;
         const correoSeleccionado = resultadoExitoso.buzón;
@@ -821,7 +865,6 @@ app.post('/buscar', async (req, res) => {
         const textoBruto = mail.text || String(mail.html).replace(/<[^>]*>?/gm, ' ') || "";
         const textoCorreo = textoBruto.toLowerCase();
 
-        // El resto del procesamiento (país, IP, base de datos) queda exactamente igual
         if (accion === 'pais' && !esConsultaGmailDirecta) {
             let paisDetectado = null;
             const reglasPais = [
