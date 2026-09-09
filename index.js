@@ -293,7 +293,7 @@ app.use(async (req, res, next) => {
 });
 
 // ==========================================
-// RUTA LOGIN - DISEÑO NETFLIX PREMIUM
+// RUTA LOGIN - DISEÑO MODERNO Y LIMPIO
 // ==========================================
 app.get('/', (req, res) => {
     res.send(`
@@ -302,9 +302,9 @@ app.get('/', (req, res) => {
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Acceso - Netflix</title>
+        <title>Acceso - stremin gunpreetsel</title>
         <style>
-            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap');
 
             body {
                 margin: 0;
@@ -316,91 +316,67 @@ app.get('/', (req, res) => {
                 background-attachment: fixed;
                 height: 100vh;
                 display: flex;
-                flex-direction: column;
+                justify-content: center;
+                align-items: center;
                 background-color: #000;
             }
 
             .overlay {
                 position: absolute;
                 top: 0; left: 0; width: 100%; height: 100%;
-                background: rgba(0, 0, 0, 0.5);
-                background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.2) 60%, rgba(0, 0, 0, 0.8) 100%);
+                background: rgba(0,0,0,0.5);
                 z-index: 1;
             }
 
-            .header {
-                position: relative;
-                z-index: 2;
-                padding: 25px 5%;
-                display: flex;
-                justify-content: flex-start;
-            }
-
-            .brand {
-                color: #E50914;
-                font-size: 45px;
-                font-weight: 800;
-                text-transform: uppercase;
-                letter-spacing: -1px;
-                text-decoration: none;
-                text-shadow: 0 2px 10px rgba(0,0,0,0.5);
-            }
-
-            .login-container {
-                position: relative;
-                z-index: 2;
-                flex: 1;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                padding: 20px;
-            }
-
             .login-box {
-                background: rgba(0, 0, 0, 0.75);
-                border-radius: 8px;
-                padding: 60px 68px 40px;
+                position: relative;
+                z-index: 2;
+                background: rgba(0, 0, 0, 0.75); /* Fondo oscuro transparente */
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                border-radius: 16px;
+                padding: 50px;
                 width: 100%;
-                max-width: 450px;
+                max-width: 380px;
+                box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9);
                 box-sizing: border-box;
-                box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+                text-align: center;
             }
 
             .login-box h2 {
                 color: #ffffff;
-                font-size: 32px;
-                font-weight: 700;
+                font-size: 26px;
+                font-weight: 800;
                 margin-top: 0;
-                margin-bottom: 28px;
+                margin-bottom: 30px;
             }
 
             .input-group {
-                margin-bottom: 16px;
+                margin-bottom: 20px;
             }
 
-            /* Inputs limpios, sin labels flotantes a las esquinas */
             .input-group input {
                 width: 100%;
-                background: #333333;
-                border: 1px solid #333333;
+                background: rgba(255, 255, 255, 0.08);
+                border: 1px solid rgba(255, 255, 255, 0.15);
                 color: #ffffff;
-                height: 50px;
-                padding: 0 20px;
+                height: 52px;
+                padding: 0 16px;
                 box-sizing: border-box;
-                font-size: 16px;
-                border-radius: 4px;
+                font-size: 15px;
+                border-radius: 8px;
                 outline: none;
-                transition: 0.3s ease;
+                transition: all 0.3s ease;
             }
 
             .input-group input:focus {
-                background: #454545;
-                border-bottom: 2px solid #E50914;
+                background: rgba(255, 255, 255, 0.12);
+                border-color: #E50914;
             }
-            
+
             .input-group input::placeholder {
-                color: #8c8c8c;
-                font-size: 15px;
+                color: #94a3b8;
             }
 
             .btn-submit {
@@ -411,677 +387,42 @@ app.get('/', (req, res) => {
                 font-weight: 700;
                 padding: 16px;
                 border: none;
-                border-radius: 4px;
-                cursor: pointer;
-                margin-top: 24px;
-                transition: background 0.2s;
-            }
-
-            .btn-submit:hover {
-                background: #c11119;
-            }
-
-            .help-text {
-                color: #737373;
-                font-size: 13px;
-                margin-top: 50px;
-                line-height: 1.6;
-            }
-            
-            .help-text span {
-                color: #0071eb;
-                cursor: pointer;
-            }
-            .help-text span:hover {
-                text-decoration: underline;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="overlay"></div>
-        
-        <header class="header">
-            <div class="brand">NETFLIX</div>
-        </header>
-        
-        <div class="login-container">
-            <div class="login-box">
-                <h2>Iniciar Sesión</h2>
-                
-                <form action="/login" method="POST">
-                    <div class="input-group">
-                        <input type="text" name="user" placeholder="Usuario (dueño)" required>
-                    </div>
-                    <div class="input-group">
-                        <input type="password" name="pass" placeholder="Contraseña" required>
-                    </div>
-                    <button type="submit" class="btn-submit">Ingresar</button>
-                </form>
-                
-                <div class="help-text">
-                    Acceso cifrado. Panel Central protegido para la seguridad de la plataforma.<br><br>
-                    Esta página está protegida por Google reCAPTCHA para comprobar que no eres un robot. <span>Más información.</span>
-                </div>
-            </div>
-        </div>
-    </body>
-    </html>
-    `);
-});
-
-app.post('/login', async (req, res) => {
-    const { user, pass } = req.body;
-    try {
-        const row = await dbGet("SELECT * FROM usuarios WHERE user = ? AND pass = ?", [user, pass]);
-        if (row) {
-            req.session.uid = row.id; req.session.user = row.user; req.session.rol = row.rol;
-            res.redirect('/dash');
-        } else { res.send("<script>alert('⛔ Datos incorrectos.'); window.location='/';</script>"); }
-    } catch (err) { res.redirect('/'); }
-});
-
-app.get('/logout', (req, res) => {
-    req.session.destroy();
-    res.redirect('/');
-});
-
-app.get('/admin/logout-todos', (req, res) => {
-    if (req.session.user === 'ruben' || req.session.rol === 'Administrador') { req.sessionStore.clear(() => { res.redirect('/'); }); } else { res.redirect('/dash'); }
-});
-
-app.get('/dash', async (req, res) => {
-    const esAdminPrincipal = (req.session.user === 'ruben' || req.session.rol === 'Administrador');
-    const esSubAdmin = (req.session.rol === 'Subadministrador');
-
-    if (esAdminPrincipal || esSubAdmin || req.session.rol === 'Cliente') {
-        try {
-            let query = esAdminPrincipal ? "SELECT * FROM usuarios" : "SELECT * FROM usuarios WHERE creado_por = ? OR id = ?";
-            let params = esAdminPrincipal ? [] : [req.session.uid, req.session.uid];
-            const usuarios = await dbAll(query, params);
-            const correos = await dbAll("SELECT * FROM correos", []);
-            const registros = await dbAll("SELECT * FROM registro_codigos ORDER BY id DESC LIMIT 5", []);
-
-            let plataformasCardsHtml = "";
-            Object.keys(PLATAFORMAS).forEach(key => {
-                let plat = PLATAFORMAS[key];
-                plataformasCardsHtml += `
-                <div class="plat-card">
-                    <div style="position:absolute; top:-50px; right:-50px; width:150px; height:150px; background:radial-gradient(circle, ${plat.alpha} 0%, transparent 70%); border-radius:50%; pointer-events:none;"></div>
-                    <div class="plat-header">
-                        <img src="${plat.logo}" alt="${plat.nombre}" class="plat-logo" style="filter: drop-shadow(0px 0px 10px ${plat.color});">
-                        <span class="status-ok">DE ACUERDO</span>
-                    </div>
-                    <div class="plat-stats">
-                        <span>Estado</span>
-                        <div class="line" style="background: ${plat.color};"></div>
-                        <small>Códigos activos: 145/200</small>
-                    </div>
-                    <div class="plat-actions">
-                        <button class="btn-dark-blue" onclick="openTab('panel-${key}')">Consulta tu plataforma</button>
-                        <button class="btn-light-pill" onclick="openTab('panel-${key}')">Consultar códigos</button>
-                    </div>
-                </div>`;
-            });
-
-            plataformasCardsHtml += `
-            <div class="plat-card">
-                <div style="position:absolute; top:-50px; right:-50px; width:150px; height:150px; background:radial-gradient(circle, rgba(234, 67, 53, 0.08) 0%, transparent 70%); border-radius:50%; pointer-events:none;"></div>
-                <div class="plat-header">
-                    <span style="font-weight: 800; font-size: 16px; color: #ea4335;">GMAIL</span>
-                    <span class="status-ok">DE ACUERDO</span>
-                </div>
-                <div class="plat-stats">
-                    <span>Buzón Central</span>
-                    <div class="line" style="background: #ea4335;"></div>
-                    <small>aniketseller2@gmail.com</small>
-                </div>
-                <div class="plat-actions">
-                    <button class="btn-dark-blue" onclick="openTab('panel-gmail')">Consulta tu plataforma</button>
-                    <button class="btn-light-pill" onclick="openTab('panel-gmail')">Consultar códigos</button>
-                </div>
-            </div>`;
-
-            let plataformasPanelsHtml = "";
-            Object.keys(PLATAFORMAS).forEach(key => {
-                let plat = PLATAFORMAS[key];
-                plataformasPanelsHtml += `
-                <div id="panel-${key}" class="main-card">
-                    <div class="main-card-header">
-                        <img src="${plat.logo}" alt="${plat.nombre}" class="main-card-logo" style="filter: drop-shadow(0px 0px 15px ${plat.color});">
-                        <div class="main-card-title">
-                            <h3>Gestor Central ${plat.nombre}</h3>
-                            <p>Búsqueda avanzada de códigos y accesos cifrados de ${plat.nombre}.</p>
-                        </div>
-                    </div>
-                    <form action="/buscar" method="POST" target="marco_resultados">
-                        <input type="hidden" name="plataforma" value="${key}">
-                        <div class="action-row">
-                            <button type="submit" name="accion" value="mensaje" class="action-btn-pill">📩 LEER MENSAJE</button>
-                            <button type="submit" name="accion" value="pais" class="action-btn-pill">🌍 ANALIZAR PAÍS</button>
-                            <button type="submit" name="accion" value="ip" class="action-btn-pill">📡 BUSCAR IP</button>
-                        </div>
-                        
-                        <div style="position: relative; width: 100%;">
-                            <input type="text" id="email_search_${key}" name="email_search" class="search-input-large" placeholder="✉️ Buscar correo registrado en ${plat.nombre}..." oninput="verificarHotmail(this, '${key}')" required>
-                            
-                            <div id="sugerencia_ghoulflix_${key}" class="sugerencia-dominio" onclick="cambiarDominio('${key}')" style="display: none;">
-                                🔁 Usar <strong>@ghoulflix.com</strong>
-                            </div>
-                        </div>
-
-                    </form>
-                </div>`;
-            });
-
-            plataformasPanelsHtml += `
-            <div id="panel-gmail" class="main-card">
-                <div class="main-card-header">
-                    <div style="font-size: 32px; font-weight: 800; color: #ea4335;">GMAIL</div>
-                    <div class="main-card-title">
-                        <h3>Gestor Buzón aniketseller2@gmail.com</h3>
-                        <p>Consulta directa del último correo recibido en el buzón central.</p>
-                    </div>
-                </div>
-                <form action="/buscar" method="POST" target="marco_resultados">
-                    <input type="hidden" name="plataforma" value="gmail">
-                    <div class="action-row">
-                        <button type="submit" name="accion" value="mensaje" class="action-btn-pill">📩 LEER ÚLTIMO MENSAJE</button>
-                    </div>
-                    <input type="text" name="email_search" class="search-input-large" value="aniketseller2@gmail.com" readonly style="background:#e2e8f0; cursor:not-allowed;">
-                </form>
-            </div>`;
-
-            let actividadesHtml = "";
-            if (registros.length > 0) {
-                registros.forEach(r => {
-                    actividadesHtml += `<div class="activity-item"><strong>Consultar correo ${r.email_buscado}</strong><span>${r.fecha} - ${r.user}</span></div>`;
-                });
-            } else {
-                actividadesHtml = `<div class="activity-item"><span>No hay actividades recientes.</span></div>`;
-            }
-            
-            let clientesOpcionesHtml = usuarios.filter(u => u.rol === 'Cliente').map(u => `<option value="${u.id}">${u.userEntiendo perfectamente a qué te refieres. El texto largo en la esquina y el cuadro de entrada con el texto "(dueño)" rompían un poco con la estética limpia que buscas. 
-
-He ajustado el código de tu archivo `index (16).js`[cite: 1] para que el diseño del inicio de sesión sea mucho más profesional, fiel al estilo clásico y llamativo que pides.
-
-### Cambios realizados:
-*   **Marca de la esquina:** Se eliminó el nombre anterior y ahora dice únicamente **NETFLIX** con su fuente y color rojo característicos[cite: 1].
-*   **Cuadros de texto limpios:** Se eliminó la etiqueta de "Usuario (dueño)" y se reemplazó por un diseño minimalista donde solo dice "Usuario" y "Contraseña"[cite: 1].
-*   **Estética general:** El cuadro principal ahora tiene un fondo oscuro semitransparente con bordes redondeados y entradas de texto en gris oscuro, imitando la pantalla de inicio de sesión real de Netflix para que sea mucho más elegante[cite: 1].
-
-Aquí tienes el código completo con las mejoras aplicadas:
-
-```javascript
-const express = require('express');
-const session = require('express-session');
-const sqlite3 = require('sqlite3').verbose();
-const imaps = require('imap-simple');
-const { simpleParser } = require('mailparser');
-const path = require('path');
-const app = express();
-
-app.use(express.static('public'));
-
-const dbPath = path.resolve(__dirname, 'betflix_mexico_v1.db');
-const db = new sqlite3.Database(dbPath, (err) => {
-    if (err) {
-        console.error("Error al abrir la base de datos", err.message);
-    } else {
-        console.log("💾 Base de datos conectada correctamente en:", dbPath);
-    }
-});
-
-const dbGet = (query, params = []) => new Promise((resolve, reject) => db.get(query, params, (err, row) => err ? reject(err) : resolve(row)));
-const dbAll = (query, params = []) => new Promise((resolve, reject) => db.all(query, params, (err, rows) => err ? reject(err) : resolve(rows)));
-const dbRun = (query, params = []) => new Promise((resolve, reject) => db.run(query, params, function(err) { err ? reject(err) : resolve(this) }));
-
-const CUENTAS_GMAIL_MAP = {
-    'tokioappoficial@gmail.com': 'avzepljuczbawvoy',
-    'riandasnet@gmail.com': 'updchdcdsjnxvnyy',
-    'clubecampestrejp@gmail.com': 'ipmvedbivouzeudi',
-    'capoeirajpmg@gmail.com': 'nsadcogfhbxbmnac',
-    'darciogarces@gmail.com': 'wkcidkcgtuapcnkh',
-    'julianamjp1@gmail.com': 'lkambczcmvkddvcz',
-    'casu34jk@gmail.com': 'npbqnwucjkicsnow',
-    'santiagorevend@gmail.com': 'dqawfgnliyolqvjy',
-    'aniketseller2@gmail.com': 'eogzbxpttachdnf'
-};
-
-const PLATAFORMAS = {
-    'netflix': { nombre: 'Netflix', color: '#E50914', alpha: 'rgba(229, 9, 20, 0.08)', logo: '[https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg](https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg)', keyword_from: 'netflix' },
-    'disney': { nombre: 'Disney+', color: '#113CCF', alpha: 'rgba(17, 60, 207, 0.08)', logo: '[https://upload.wikimedia.org/wikipedia/commons/3/3e/Disney%2B_logo.svg](https://upload.wikimedia.org/wikipedia/commons/3/3e/Disney%2B_logo.svg)', keyword_from: 'disneyplus' },
-    'crunchyroll': { nombre: 'Crunchyroll', color: '#F47521', alpha: 'rgba(244, 117, 33, 0.08)', logo: '[https://raw.githubusercontent.com/walkxcode/dashboard-icons/main/svg/crunchyroll.svg](https://raw.githubusercontent.com/walkxcode/dashboard-icons/main/svg/crunchyroll.svg)', keyword_from: 'crunchyroll' },
-    'spotify': { nombre: 'Spotify', color: '#1DB954', alpha: 'rgba(29, 185, 84, 0.08)', logo: '[https://upload.wikimedia.org/wikipedia/commons/2/26/Spotify_logo_with_text.svg](https://upload.wikimedia.org/wikipedia/commons/2/26/Spotify_logo_with_text.svg)', keyword_from: 'spotify' }
-};
-
-app.use(express.urlencoded({ extended: true }));
-app.use(session({
-    secret: 'betflix_mexico_ultra_secure_2026_MX',
-    resave: false,
-    saveUninitialized: true,
-    cookie: { maxAge: 24 * 60 * 60 * 1000 }
-}));
-
-db.serialize(() => {
-    db.run("CREATE TABLE IF NOT EXISTS usuarios (id INTEGER PRIMARY KEY AUTOINCREMENT, user TEXT UNIQUE, pass TEXT, rol TEXT, creado_por INTEGER)");
-    db.run("CREATE TABLE IF NOT EXISTS correos (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT, user_id INTEGER, fecha_asignacion DATETIME DEFAULT (date('now', 'localtime')))");
-    db.run("CREATE TABLE IF NOT EXISTS registro_codigos (id INTEGER PRIMARY KEY AUTOINCREMENT, user TEXT, email_buscado TEXT, fecha DATETIME DEFAULT (datetime('now', 'localtime')))");
-    
-    db.run("ALTER TABLE usuarios ADD COLUMN creado_por INTEGER", (err) => {});
-    db.run("ALTER TABLE correos ADD COLUMN fecha_asignacion DATETIME DEFAULT (date('now', 'localtime'))", (err) => {});
-    
-    db.run("INSERT OR IGNORE INTO usuarios (user, pass, rol, creado_por) VALUES ('dueño', 'teamo2020', 'Administrador', NULL)");
-});
-
-const CSS_MODERNO = `
-<style>
-    @import url('[https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap](https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap)');
-
-    :root {
-        --bg-main: #f4f6f9; 
-        --card-bg: #ffffff;
-        --text-dark: #0f172a;
-        --text-muted: #64748b;
-        --border-soft: #e2e8f0;
-        --btn-dark: #1e293b;
-        --btn-light: #f1f5f9;
-        --green-ok: #22c55e;
-        --shadow-soft: 0 8px 30px rgba(0,0,0,0.04);
-        --radius-pill: 50px;
-        --radius-card: 24px;
-    }
-
-    body { 
-        background-color: var(--bg-main); 
-        color: var(--text-dark); 
-        font-family: 'Inter', sans-serif; 
-        margin: 0; padding: 0; box-sizing: border-box; overflow-x: hidden; 
-    }
-
-    .goog-te-banner-frame.skiptranslate, #goog-gt-tt, .goog-te-gadget-tooltip { display: none !important; }
-    body { top: 0px !important; }
-
-    .top-header { 
-        background: var(--bg-main); 
-        padding: 20px 40px; 
-        display: flex; justify-content: space-between; align-items: center; 
-    }
-    
-    .user-pill {
-        display: flex; align-items: center; gap: 12px;
-        background: var(--card-bg); padding: 8px 16px; 
-        border-radius: var(--radius-pill); box-shadow: var(--shadow-soft);
-        font-size: 13px; cursor: pointer;
-    }
-    .user-pill img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
-    .user-pill .info { display: flex; flex-direction: column; }
-    .user-pill .info strong { color: var(--text-dark); font-weight: 700; }
-    .user-pill .info span { color: var(--text-muted); font-size: 11px; }
-
-    .brand-logo { font-size: 22px; font-weight: 800; display:flex; align-items:center; gap: 8px; letter-spacing: -0.5px; text-transform: uppercase;}
-    .brand-logo .icon { color: #10b981; }
-
-    .search-top { display: flex; align-items: center; gap: 15px; }
-    .search-top input {
-        background: var(--card-bg); border: none; padding: 12px 20px; width: 300px;
-        border-radius: var(--radius-pill); box-shadow: var(--shadow-soft);
-        font-family: 'Inter', sans-serif; font-size: 14px; outline: none;
-    }
-    .search-top .menu-btn {
-        background: var(--card-bg); border: none; width: 42px; height: 42px;
-        border-radius: 50%; box-shadow: var(--shadow-soft); font-weight: bold;
-        cursor: pointer; display: flex; justify-content: center; align-items: center;
-    }
-
-    .dashboard-grid { 
-        display: grid; 
-        grid-template-columns: 420px 1fr 320px; 
-        gap: 30px; 
-        padding: 10px 40px 40px 40px; 
-        align-items: start;
-    }
-
-    .platforms-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-    .plat-card {
-        background: var(--card-bg); border-radius: var(--radius-card); padding: 25px 20px;
-        box-shadow: var(--shadow-soft); display: flex; flex-direction: column; gap: 15px;
-        position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,0.5);
-    }
-    .plat-header { display: flex; justify-content: space-between; align-items: flex-start; z-index: 2; position: relative; }
-    
-    .plat-logo { height: 28px; max-width: 100px; object-fit: contain; transition: 0.3s; }
-    .main-card-logo { height: 40px; max-width: 150px; object-fit: contain; transition: 0.3s; }
-
-    .status-ok { background: var(--green-ok); color: white; font-size: 10px; font-weight: 800; padding: 4px 8px; border-radius: 50px; box-shadow: 0 4px 10px rgba(34, 197, 94, 0.3); }
-    
-    .plat-stats { z-index: 2; position: relative; margin-top: 10px; }
-    .plat-stats span { display: block; font-size: 13px; font-weight: 600; color: var(--text-dark); margin-bottom: 5px; }
-    .plat-stats .line { height: 2px; width: 100%; border-radius: 2px; margin-bottom: 8px; }
-    .plat-stats small { font-size: 12px; color: var(--text-muted); font-weight: 500; }
-
-    .plat-actions { display: flex; flex-direction: column; gap: 8px; z-index: 2; position: relative; margin-top: auto; }
-    .btn-dark-blue { background: var(--btn-dark); color: white; border: none; padding: 12px; border-radius: 12px; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; }
-    .btn-dark-blue:hover { opacity: 0.9; transform: translateY(-2px); }
-    .btn-light-pill { background: var(--btn-light); color: var(--text-dark); border: none; padding: 12px; border-radius: 12px; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; }
-    .btn-light-pill:hover { background: #e2e8f0; }
-
-    .center-panel { display: flex; flex-direction: column; gap: 25px; }
-    .main-card {
-        background: var(--card-bg); border-radius: var(--radius-card); padding: 40px;
-        box-shadow: var(--shadow-soft); display: none; animation: fadeIn 0.3s ease;
-    }
-    .main-card.active { display: block; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-    .main-card-header { display: flex; align-items: center; gap: 20px; margin-bottom: 30px; }
-    .main-card-title h3 { margin: 0; font-size: 22px; color: var(--text-dark); font-weight: 800; }
-    .main-card-title p { margin: 5px 0 0 0; color: var(--text-muted); font-size: 13px; }
-
-    .action-row { display: flex; gap: 15px; margin-bottom: 25px; }
-    .action-btn-pill {
-        flex: 1; background: var(--btn-light); border: 1px solid var(--border-soft);
-        padding: 15px; border-radius: var(--radius-pill); font-size: 12px; font-weight: 700;
-        color: var(--text-dark); cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px;
-        transition: 0.2s;
-    }
-    .action-btn-pill:hover { background: #e2e8f0; }
-
-    .search-input-large {
-        width: 100%; background: var(--btn-light); border: 1px solid var(--border-soft);
-        padding: 18px 25px; border-radius: var(--radius-pill); font-size: 14px;
-        color: var(--text-dark); outline: none; box-sizing: border-box; font-family: 'Inter', sans-serif;
-    }
-
-    .iframe-container {
-        background: var(--card-bg); border-radius: var(--radius-card); 
-        box-shadow: var(--shadow-soft); overflow: hidden; 
-        height: 500px; display: flex; flex-direction: column;
-    }
-    .iframe-header {
-        padding: 15px 25px; background: var(--btn-light); 
-        border-bottom: 1px solid var(--border-soft); font-weight: 700; 
-        font-size: 13px; color: var(--text-dark); display: flex; align-items: center; gap: 8px;
-    }
-
-    .right-sidebar { display: flex; flex-direction: column; gap: 25px; }
-    .side-card {
-        background: var(--card-bg); border-radius: var(--radius-card); padding: 25px;
-        box-shadow: var(--shadow-soft);
-    }
-    .side-card h4 { margin: 0 0 20px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dark); font-weight: 800; }
-    
-    .activity-list { display: flex; flex-direction: column; gap: 15px; }
-    .activity-item { border-bottom: 1px solid var(--btn-light); padding-bottom: 12px; }
-    .activity-item:last-child { border-bottom: none; padding-bottom: 0; }
-    .activity-item strong { display: block; font-size: 13px; color: var(--text-dark); }
-    .activity-item span { font-size: 11px; color: var(--text-muted); }
-
-    .menu-list { display: flex; flex-direction: column; gap: 10px; }
-    .menu-btn-item {
-        background: var(--btn-light); border: none; padding: 14px 20px;
-        border-radius: var(--radius-pill); font-size: 13px; font-weight: 600;
-        color: var(--text-dark); cursor: pointer; text-align: left; display: flex; align-items: center; gap: 12px;
-        transition: 0.2s; font-family: 'Inter', sans-serif;
-    }
-    .menu-btn-item:hover { background: #e2e8f0; transform: translateX(5px); }
-
-    .input-classic { width: 100%; padding: 15px; margin-bottom: 15px; border-radius: 12px; border: 1px solid var(--border-soft); background: var(--btn-light); font-family: 'Inter', sans-serif; box-sizing: border-box;}
-    .btn-submit { background: var(--btn-dark); color: white; border: none; padding: 15px; border-radius: 12px; font-weight: 700; cursor: pointer; width: 100%; }
-
-    .sugerencia-dominio {
-        background: #1e293b;
-        color: white;
-        padding: 8px 16px;
-        border-radius: 50px;
-        font-size: 13px;
-        font-weight: 600;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        margin-top: 10px;
-        transition: 0.2s ease;
-        border: 1px solid #334155;
-    }
-    .sugerencia-dominio:hover {
-        background: #334155;
-        transform: translateY(-2px);
-    }
-</style>
-
-<script>
-    function verificarHotmail(inputElem, platKey) {
-        let valor = inputElem.value.toLowerCase();
-        let sugerencia = document.getElementById('sugerencia_ghoulflix_' + platKey);
-        
-        if (valor.includes('@hotmail.com')) {
-            sugerencia.style.display = 'inline-flex';
-        } else {
-            sugerencia.style.display = 'none';
-        }
-    }
-
-    function cambiarDominio(platKey) {
-        let inputElem = document.getElementById('email_search_' + platKey);
-        let valor = inputElem.value.toLowerCase();
-        
-        if (valor.includes('@hotmail.com')) {
-            inputElem.value = valor.replace('@hotmail.com', '@ghoulflix.com');
-            document.getElementById('sugerencia_ghoulflix_' + platKey).style.display = 'none';
-            inputElem.focus();
-        }
-    }
-
-    function openTab(tabId) {
-        document.querySelectorAll('.main-card').forEach(p => p.classList.remove('active'));
-        let selectedTab = document.getElementById(tabId);
-        if(selectedTab) selectedTab.classList.add('active');
-        localStorage.setItem('activeBetflixTab', tabId);
-    }
-    
-    document.addEventListener('DOMContentLoaded', () => {
-        let active = localStorage.getItem('activeBetflixTab');
-        const urlParams = new URLSearchParams(window.location.search);
-        if(urlParams.has('buscar_dueno')) {
-            active = 'panel-base-datos';
-        }
-        if(!active || !document.getElementById(active)) active = 'panel-netflix'; 
-        openTab(active);
-    });
-</script>
-`;
-
-app.use(async (req, res, next) => {
-    const rutasAbiertas = ['/', '/login', '/logout'];
-    if (rutasAbiertas.includes(req.path)) return next();
-    if (req.session && req.session.uid) {
-        try {
-            const row = await dbGet("SELECT id FROM usuarios WHERE id = ?", [req.session.uid]);
-            if (!row) {
-                req.session.destroy();
-                return res.send("<script>alert('⛔ ACCESO DENEGADO'); window.location='/';</script>");
-            }
-            next();
-        } catch (err) { return res.redirect('/'); }
-    } else { return res.redirect('/'); }
-});
-
-// ==========================================
-// RUTA LOGIN - DISEÑO NETFLIX MODERNO
-// ==========================================
-app.get('/', (req, res) => {
-    res.send(`
-    <!DOCTYPE html>
-    <html lang="es">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Acceso - NETFLIX</title>
-        <style>
-            @import url('[https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap](https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap)');
-
-            body {
-                margin: 0;
-                padding: 0;
-                font-family: 'Inter', sans-serif;
-                background-image: url('[https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80](https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80)');
-                background-size: cover;
-                background-position: center;
-                background-attachment: fixed;
-                height: 100vh;
-                display: flex;
-                flex-direction: column;
-                background-color: #000;
-            }
-
-            .overlay {
-                position: absolute;
-                top: 0; left: 0; width: 100%; height: 100%;
-                background: rgba(0, 0, 0, 0.5); /* Oscurecido simple para mayor contraste */
-                z-index: 1;
-            }
-
-            .header {
-                position: relative;
-                z-index: 2;
-                padding: 25px 4%;
-                display: flex;
-                justify-content: flex-start;
-            }
-
-            /* Logotipo clásico limpio */
-            .brand {
-                color: #E50914;
-                font-size: 42px;
-                font-weight: 800;
-                text-transform: uppercase;
-                letter-spacing: -1px;
-                text-decoration: none;
-            }
-
-            .login-container {
-                position: relative;
-                z-index: 2;
-                flex: 1;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                padding: 20px;
-            }
-
-            /* Panel clásico oscuro */
-            .login-box {
-                background: rgba(0, 0, 0, 0.75);
                 border-radius: 8px;
-                padding: 60px 68px 40px;
-                width: 100%;
-                max-width: 450px;
-                box-sizing: border-box;
-            }
-
-            .login-box h2 {
-                color: #ffffff;
-                font-size: 32px;
-                font-weight: 600;
-                margin-top: 0;
-                margin-bottom: 28px;
-            }
-
-            .input-group {
-                position: relative;
-                margin-bottom: 16px;
-            }
-
-            /* Inputs oscuros sólidos sin marcos extraños */
-            .input-group input {
-                width: 100%;
-                background: #333333;
-                border: none;
-                border-radius: 4px;
-                color: #ffffff;
-                height: 50px;
-                padding: 16px 20px 0;
-                box-sizing: border-box;
-                font-size: 15px;
-                outline: none;
-                transition: background 0.2s ease;
-            }
-
-            .input-group input:focus {
-                background: #454545;
-            }
-
-            /* Etiquetas flotantes minimalistas */
-            .input-group label {
-                position: absolute;
-                left: 20px;
-                top: 50%;
-                transform: translateY(-50%);
-                color: #8c8c8c;
-                font-size: 15px;
-                transition: all 0.1s ease;
-                pointer-events: none;
-            }
-
-            .input-group input:focus + label,
-            .input-group input:valid + label {
-                top: 14px;
-                font-size: 11px;
-            }
-
-            /* Botón rojo vibrante */
-            .btn-submit {
-                width: 100%;
-                background: #E50914;
-                color: #ffffff;
-                font-size: 16px;
-                font-weight: 600;
-                padding: 16px;
-                border: none;
-                border-radius: 4px;
                 cursor: pointer;
-                margin-top: 24px;
-                transition: background 0.2s;
+                margin-top: 10px;
+                transition: 0.2s;
             }
 
             .btn-submit:hover {
-                background: #c90812;
+                background: #f40612;
             }
 
             .help-text {
-                color: #737373;
+                color: #94a3b8;
                 font-size: 13px;
-                margin-top: 50px;
-                line-height: 1.6;
+                margin-top: 30px;
+                line-height: 1.5;
             }
         </style>
     </head>
     <body>
         <div class="overlay"></div>
         
-        <header class="header">
-            <div class="brand">NETFLIX</div>
-        </header>
-        
-        <div class="login-container">
-            <div class="login-box">
-                <h2>Iniciar Sesión</h2>
-                
-                <form action="/login" method="POST">
-                    <div class="input-group">
-                        <input type="text" name="user" required>
-                        <label>Usuario</label>
-                    </div>
-                    <div class="input-group">
-                        <input type="password" name="pass" required>
-                        <label>Contraseña</label>
-                    </div>
-                    <button type="submit" class="btn-submit">Iniciar sesión</button>
-                </form>
-                
-                <div class="help-text">
-                    Acceso cifrado. Panel Central protegido para la seguridad de la plataforma.
+        <div class="login-box">
+            <h2>Iniciar Sesión</h2>
+            
+            <form action="/login" method="POST">
+                <div class="input-group">
+                    <input type="text" name="user" placeholder="Usuario (dueño)" required>
                 </div>
+                <div class="input-group">
+                    <input type="password" name="pass" placeholder="Contraseña" required>
+                </div>
+                <button type="submit" class="btn-submit">Ingresar</button>
+            </form>
+            
+            <div class="help-text">
+                Acceso cifrado. Panel Central protegido para la seguridad de la plataforma.
             </div>
         </div>
     </body>
@@ -1279,7 +620,7 @@ app.get('/dash', async (req, res) => {
             
             <div class="top-header">
                 <div class="user-pill" onclick="window.location='/logout'" title="Cerrar sesión">
-                    <img src="[https://ui-avatars.com/api/?name=$](https://ui-avatars.com/api/?name=$){req.session.user}&background=random" alt="Avatar">
+                    <img src="https://ui-avatars.com/api/?name=${req.session.user}&background=random" alt="Avatar">
                     <div class="info">
                         <strong>${req.session.user}</strong>
                         <span>${req.session.rol} ▾</span>
