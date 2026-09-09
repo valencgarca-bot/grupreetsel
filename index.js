@@ -6,7 +6,7 @@ const { simpleParser } = require('mailparser');
 const path = require('path');
 const app = express();
 
-// Habilitamos la carpeta "public" para leer la imagen de fondo
+// Habilitamos la carpeta "public" por si luego quieres subir tus propias imágenes
 app.use(express.static('public'));
 
 const dbPath = path.resolve(__dirname, 'betflix_mexico_v1.db');
@@ -105,7 +105,6 @@ const CSS_MODERNO = `
     .user-pill .info strong { color: var(--text-dark); font-weight: 700; }
     .user-pill .info span { color: var(--text-muted); font-size: 11px; }
 
-    /* AQUI SE CAMBIO EL NOMBRE DEL DASHBOARD */
     .brand-logo { font-size: 22px; font-weight: 800; display:flex; align-items:center; gap: 8px; letter-spacing: -0.5px; text-transform: uppercase;}
     .brand-logo .icon { color: #10b981; }
 
@@ -295,76 +294,215 @@ app.use(async (req, res, next) => {
 });
 
 // ==========================================
-// RUTA LOGIN CON EL NUEVO DISEÑO
+// RUTA LOGIN - DISEÑO CYBERPUNK / GLASSMORPHISM COMPLETO
 // ==========================================
 app.get('/', (req, res) => {
     res.send(`
-    <style>
-        body { 
-            /* AQUI CARGA TU IMAGEN DESDE LA CARPETA PUBLIC */
-            background: url('/fondo.jpg') no-repeat center center fixed; 
-            background-size: cover;
-            font-family: 'Inter', sans-serif; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            height: 100vh; 
-            margin: 0; 
-        }
-        /* Capa oscura semitransparente sobre el fondo para que resalte la caja */
-        body::before {
-            content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.4); z-index: -1;
-        }
-        /* Diseño Glassmorphism (Cristal) */
-        .login-box { 
-            background: rgba(30, 41, 59, 0.6);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            padding: 40px; 
-            border-radius: 24px; 
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); 
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            text-align: center; 
-            width: 100%; 
-            max-width: 350px; 
-        }
-        .login-box h2 {
-            color: #ffffff;
-            font-size: 26px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-top: 0;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
-        }
-        .login-box p {
-            color: #cbd5e1;
-        }
-        input { 
-            width: 100%; padding: 15px; margin-bottom: 15px; border-radius: 50px; 
-            border: 1px solid rgba(255,255,255,0.3); background: rgba(0,0,0,0.5); 
-            color: white; box-sizing: border-box; text-align: center; 
-            font-family: 'Inter', sans-serif; outline: none; 
-        }
-        input::placeholder { color: #94a3b8; }
-        button { 
-            width: 100%; padding: 15px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.4); 
-            background: linear-gradient(135deg, #1e293b, #0f172a); color: white; 
-            font-weight: bold; cursor: pointer; font-family: 'Inter', sans-serif; transition: 0.3s; 
-        }
-        button:hover { 
-            background: #334155; transform: scale(1.02); box-shadow: 0 0 15px rgba(255,255,255,0.2); 
-        }
-    </style>
-    <div class="login-box">
-        <h2 style="margin-top:0;">⚡ stremin gunpreetsel</h2>
-        <p style="font-size:14px; margin-bottom:30px;">Acceso al Panel Central</p>
-        <form action="/login" method="POST">
-            <input name="user" placeholder="Usuario" required>
-            <input type="password" name="pass" placeholder="Contraseña" required>
-            <button>Iniciar Sesión</button>
-        </form>
-    </div>
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Acceso - stremin gunpreetsel</title>
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Inter:wght@400;500;600&display=swap');
+
+            body {
+                /* Fondo de collage de películas directamente desde internet */
+                background: url('https://i.imgur.com/3f8H5qZ.jpg') no-repeat center center fixed;
+                background-size: cover;
+                font-family: 'Inter', sans-serif;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                margin: 0;
+                overflow: hidden;
+            }
+
+            body::before {
+                content: "";
+                position: absolute;
+                top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: -1;
+            }
+
+            .login-wrapper {
+                position: relative;
+                padding: 2px;
+                border-radius: 22px;
+                background: linear-gradient(135deg, #00d2ff 0%, rgba(255,255,255,0.1) 50%, #ff3a3a 100%);
+                box-shadow: 0 0 20px rgba(0, 210, 255, 0.3), 0 0 20px rgba(255, 58, 58, 0.3);
+            }
+
+            .login-box {
+                background: rgba(20, 25, 35, 0.7);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                padding: 50px 40px 40px 40px;
+                border-radius: 20px;
+                text-align: center;
+                width: 100%;
+                max-width: 340px;
+                box-sizing: border-box;
+                position: relative;
+            }
+
+            .screw {
+                position: absolute;
+                width: 8px; height: 8px;
+                background: radial-gradient(circle, #cbd5e1, #475569);
+                border-radius: 50%;
+                box-shadow: inset 1px 1px 2px rgba(255,255,255,0.4), 0 1px 3px rgba(0,0,0,0.8);
+            }
+            .screw::after {
+                content: ""; position: absolute;
+                top: 50%; left: 50%; width: 70%; height: 1.5px;
+                background: rgba(0,0,0,0.6);
+                transform: translate(-50%, -50%) rotate(45deg);
+            }
+            .screw.tl { top: 15px; left: 15px; }
+            .screw.tr { top: 15px; right: 15px; transform: rotate(20deg); }
+            .screw.bl { bottom: 15px; left: 15px; transform: rotate(-15deg); }
+            .screw.br { bottom: 15px; right: 15px; transform: rotate(80deg); }
+
+            .logo-badge {
+                position: absolute;
+                top: -35px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 70px; height: 70px;
+                background: linear-gradient(135deg, #1e293b, #0f172a);
+                border: 2px solid #94a3b8;
+                border-radius: 50%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                box-shadow: 0 8px 20px rgba(0,0,0,0.6), inset 0 2px 5px rgba(255,255,255,0.2);
+                z-index: 10;
+            }
+            .logo-badge svg {
+                width: 32px; height: 32px;
+                fill: #e2e8f0;
+                filter: drop-shadow(0 0 5px rgba(255,255,255,0.3));
+            }
+
+            .login-box h2 {
+                color: #ffffff;
+                font-family: 'Orbitron', sans-serif;
+                font-size: 20px;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+                margin: 10px 0 5px 0;
+                text-shadow: 0 0 10px rgba(255, 120, 120, 0.6);
+                line-height: 1.3;
+            }
+
+            .login-box p {
+                color: #94a3b8;
+                font-size: 12px;
+                margin-bottom: 30px;
+                letter-spacing: 0.5px;
+            }
+
+            .input-group {
+                position: relative;
+                margin-bottom: 15px;
+                display: flex;
+                align-items: center;
+            }
+
+            .input-group svg {
+                position: absolute;
+                left: 20px;
+                width: 18px;
+                height: 18px;
+                fill: #94a3b8;
+                z-index: 2;
+                pointer-events: none;
+            }
+
+            .input-group input {
+                width: 100%;
+                padding: 14px 20px 14px 50px;
+                border-radius: 50px;
+                border: 1px solid rgba(255,255,255,0.3);
+                background: rgba(0, 0, 0, 0.4);
+                color: white;
+                box-sizing: border-box;
+                font-family: 'Orbitron', sans-serif;
+                font-size: 13px;
+                outline: none;
+                transition: 0.3s;
+                box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+                text-align: center;
+            }
+            
+            .input-group input::placeholder { 
+                color: #cbd5e1; 
+                letter-spacing: 1px;
+            }
+
+            .input-group input:focus {
+                border-color: #00d2ff;
+                box-shadow: inset 0 2px 10px rgba(0,0,0,0.5), 0 0 10px rgba(0, 210, 255, 0.3);
+            }
+
+            button {
+                width: 100%;
+                padding: 14px;
+                border-radius: 50px;
+                border: 1px solid #00d2ff;
+                background: linear-gradient(135deg, rgba(30,41,59,0.8), rgba(15,23,42,0.9));
+                color: #e2e8f0;
+                font-weight: 600;
+                font-size: 14px;
+                cursor: pointer;
+                font-family: 'Inter', sans-serif;
+                transition: 0.3s;
+                box-shadow: inset 0 0 10px rgba(0, 210, 255, 0.2), 0 4px 15px rgba(0,0,0,0.4);
+                margin-top: 10px;
+            }
+
+            button:hover {
+                background: linear-gradient(135deg, rgba(30,41,59,1), #00d2ff);
+                color: #fff;
+                transform: scale(1.02);
+                box-shadow: 0 0 20px rgba(0, 210, 255, 0.5);
+            }
+        </style>
+    </head>
+    <body>
+        <div class="login-wrapper">
+            <div class="logo-badge">
+                <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            </div>
+            
+            <div class="login-box">
+                <div class="screw tl"></div>
+                <div class="screw tr"></div>
+                <div class="screw bl"></div>
+                <div class="screw br"></div>
+                
+                <h2>stremin<br>gunpreetsel</h2>
+                <p>Acceso al Panel Central</p>
+                
+                <form action="/login" method="POST">
+                    <div class="input-group">
+                        <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                        <input name="user" placeholder="dueño" required>
+                    </div>
+                    <div class="input-group">
+                        <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+                        <input type="password" name="pass" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit">Iniciar Sesión</button>
+                </form>
+            </div>
+        </div>
+    </body>
+    </html>
     `);
 });
 
