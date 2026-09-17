@@ -64,31 +64,42 @@ const CSS_MODERNO = `
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
     :root {
-        --bg-main: #f4f6f9; 
-        --card-bg: #ffffff;
+        --bg-main: transparent; 
+        --card-bg: rgba(255, 255, 255, 0.92); /* Tarjetas ligeramente transparentes para lucir el fondo */
         --text-dark: #0f172a;
         --text-muted: #64748b;
         --border-soft: #e2e8f0;
         --btn-dark: #1e293b;
-        --btn-light: #f1f5f9;
+        --btn-light: rgba(241, 245, 249, 0.85);
         --green-ok: #22c55e;
-        --shadow-soft: 0 8px 30px rgba(0,0,0,0.04);
+        --shadow-soft: 0 8px 30px rgba(0,0,0,0.08);
         --radius-pill: 50px;
         --radius-card: 24px;
     }
 
     body { 
-        background-color: var(--bg-main); 
+        /* Fondo Animado de Colores */
+        background: linear-gradient(-45deg, #a8edea, #fed6e3, #e0c3fc, #8ec5fc);
+        background-size: 400% 400%;
+        animation: gradientBG 15s ease infinite;
+        
         color: var(--text-dark); 
         font-family: 'Inter', sans-serif; 
         margin: 0; padding: 0; box-sizing: border-box; overflow-x: hidden; 
+        min-height: 100vh;
+    }
+
+    @keyframes gradientBG {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
     }
 
     .goog-te-banner-frame.skiptranslate, #goog-gt-tt, .goog-te-gadget-tooltip { display: none !important; }
     body { top: 0px !important; }
 
     .top-header { 
-        background: var(--bg-main); 
+        background: transparent; 
         padding: 20px 40px; 
         display: flex; justify-content: space-between; align-items: center; 
     }
@@ -132,6 +143,7 @@ const CSS_MODERNO = `
         background: var(--card-bg); border-radius: var(--radius-card); padding: 25px 20px;
         box-shadow: var(--shadow-soft); display: flex; flex-direction: column; gap: 15px;
         position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,0.5);
+        backdrop-filter: blur(10px);
     }
     .plat-header { display: flex; justify-content: space-between; align-items: flex-start; z-index: 2; position: relative; }
     
@@ -155,6 +167,7 @@ const CSS_MODERNO = `
     .main-card {
         background: var(--card-bg); border-radius: var(--radius-card); padding: 40px;
         box-shadow: var(--shadow-soft); display: none; animation: fadeIn 0.3s ease;
+        backdrop-filter: blur(10px);
     }
     .main-card.active { display: block; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -182,6 +195,7 @@ const CSS_MODERNO = `
         background: var(--card-bg); border-radius: var(--radius-card); 
         box-shadow: var(--shadow-soft); overflow: hidden; 
         height: 500px; display: flex; flex-direction: column;
+        backdrop-filter: blur(10px);
     }
     .iframe-header {
         padding: 15px 25px; background: var(--btn-light); 
@@ -192,7 +206,7 @@ const CSS_MODERNO = `
     .right-sidebar { display: flex; flex-direction: column; gap: 25px; }
     .side-card {
         background: var(--card-bg); border-radius: var(--radius-card); padding: 25px;
-        box-shadow: var(--shadow-soft);
+        box-shadow: var(--shadow-soft); backdrop-filter: blur(10px);
     }
     .side-card h4 { margin: 0 0 20px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dark); font-weight: 800; }
     
@@ -293,7 +307,7 @@ app.use(async (req, res, next) => {
 });
 
 // ==========================================
-// RUTA LOGIN - DISEÑO MODERNO Y LIMPIO
+// RUTA LOGIN
 // ==========================================
 app.get('/', (req, res) => {
     res.send(`
@@ -331,7 +345,7 @@ app.get('/', (req, res) => {
             .login-box {
                 position: relative;
                 z-index: 2;
-                background: rgba(0, 0, 0, 0.75); /* Fondo oscuro transparente */
+                background: rgba(0, 0, 0, 0.75);
                 backdrop-filter: blur(12px);
                 -webkit-backdrop-filter: blur(12px);
                 border: 1px solid rgba(255, 255, 255, 0.08);
@@ -707,12 +721,14 @@ app.get('/dash', async (req, res) => {
                 </div>
 
                 <div class="right-sidebar">
+                    ${(esAdminPrincipal || esSubAdmin) ? `
                     <div class="side-card">
                         <h4>Últimas Actividades</h4>
                         <div class="activity-list">
                             ${actividadesHtml}
                         </div>
                     </div>
+                    ` : ''}
 
                     <div class="side-card">
                         <h4>Gestión del Sistema</h4>
@@ -945,15 +961,21 @@ app.post('/buscar', async (req, res) => {
         }
 
         if (/\b\d{4}\b/.test(textoBruto) && (!accion || accion === 'mensaje')) {
-            try { await dbRun("INSERT INTO registro_codigos (user, email_buscado) VALUES (?, ?)", [req.session.user, email_search.trim()]); } catch(err) {}
+            try { await dbRun("INSERT INTO registro_codigos (user, email_buscado) VALUES (?, ?)", [req.session.user, email_search.trim()]); } catch(err) { console.error("Error registrando log:", err.message); }
         }
+        
+        res.send(`${cssIframe}
+            <div style="padding: 10px; border-bottom: 2px solid #e2e8f0; margin-bottom: 20px;">
+                <div style="font-weight: 800; font-size: 16px;">De: <span style="color:#64748b; font-weight:400;">${mail.from.text}</span></div>
+                <div style="font-weight: 800; font-size: 16px;">Asunto: <span style="color:#64748b; font-weight:400;">${mail.subject}</span></div>
+                <div style="font-weight: 800; font-size: 14px; margin-top:5px; color:#10b981;">Buzón consultado: ${resultadoExitoso.buzón}</div>
+            </div>
+            ${mail.html ? mail.html : `<pre style="font-family:'Inter', sans-serif; white-space:pre-wrap; word-wrap:break-word;">${mail.text}</pre>`}
+        `);
 
-        let contenidoFinal = mail.html || mail.text || "";
-        res.send(contenidoFinal);
-    } catch (e) { 
-        res.send(`${cssIframe}<div style="text-align:center; padding:40px;"><h2 style="color:#ef4444;">⚠️ Error en el servidor</h2><p>${e.message}</p></div>`); 
-    }
+    } catch (err) { res.send(`${cssIframe}<h2 style="color:red; text-align:center; padding:20px;">❌ Error Crítico de Búsqueda</h2>`); }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => { console.log(`🚀 Panel V6 Optimizado funcionando en el puerto ${PORT}`); });
+app.listen(10000, () => {
+    console.log("🚀 SISTEMA CENTRAL INICIADO EN EL PUERTO 10000");
+});
