@@ -293,7 +293,7 @@ app.use(async (req, res, next) => {
 });
 
 // ==========================================
-// RUTA LOGIN - DISEÑO MODERNO Y LIMPIO
+// RUTA LOGIN 
 // ==========================================
 app.get('/', (req, res) => {
     res.send(`
@@ -331,7 +331,7 @@ app.get('/', (req, res) => {
             .login-box {
                 position: relative;
                 z-index: 2;
-                background: rgba(0, 0, 0, 0.75); /* Fondo oscuro transparente */
+                background: rgba(0, 0, 0, 0.75); 
                 backdrop-filter: blur(12px);
                 -webkit-backdrop-filter: blur(12px);
                 border: 1px solid rgba(255, 255, 255, 0.08);
@@ -344,86 +344,26 @@ app.get('/', (req, res) => {
                 text-align: center;
             }
 
-            .login-box h2 {
-                color: #ffffff;
-                font-size: 26px;
-                font-weight: 800;
-                margin-top: 0;
-                margin-bottom: 30px;
-            }
-
-            .input-group {
-                margin-bottom: 20px;
-            }
-
-            .input-group input {
-                width: 100%;
-                background: rgba(255, 255, 255, 0.08);
-                border: 1px solid rgba(255, 255, 255, 0.15);
-                color: #ffffff;
-                height: 52px;
-                padding: 0 16px;
-                box-sizing: border-box;
-                font-size: 15px;
-                border-radius: 8px;
-                outline: none;
-                transition: all 0.3s ease;
-            }
-
-            .input-group input:focus {
-                background: rgba(255, 255, 255, 0.12);
-                border-color: #E50914;
-            }
-
-            .input-group input::placeholder {
-                color: #94a3b8;
-            }
-
-            .btn-submit {
-                width: 100%;
-                background: #E50914;
-                color: #ffffff;
-                font-size: 16px;
-                font-weight: 700;
-                padding: 16px;
-                border: none;
-                border-radius: 8px;
-                cursor: pointer;
-                margin-top: 10px;
-                transition: 0.2s;
-            }
-
-            .btn-submit:hover {
-                background: #f40612;
-            }
-
-            .help-text {
-                color: #94a3b8;
-                font-size: 13px;
-                margin-top: 30px;
-                line-height: 1.5;
-            }
+            .login-box h2 { color: #ffffff; font-size: 26px; font-weight: 800; margin-top: 0; margin-bottom: 30px; }
+            .input-group { margin-bottom: 20px; }
+            .input-group input { width: 100%; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; height: 52px; padding: 0 16px; box-sizing: border-box; font-size: 15px; border-radius: 8px; outline: none; transition: all 0.3s ease; }
+            .input-group input:focus { background: rgba(255, 255, 255, 0.12); border-color: #E50914; }
+            .input-group input::placeholder { color: #94a3b8; }
+            .btn-submit { width: 100%; background: #E50914; color: #ffffff; font-size: 16px; font-weight: 700; padding: 16px; border: none; border-radius: 8px; cursor: pointer; margin-top: 10px; transition: 0.2s; }
+            .btn-submit:hover { background: #f40612; }
+            .help-text { color: #94a3b8; font-size: 13px; margin-top: 30px; line-height: 1.5; }
         </style>
     </head>
     <body>
         <div class="overlay"></div>
-        
         <div class="login-box">
             <h2>Iniciar Sesión</h2>
-            
             <form action="/login" method="POST">
-                <div class="input-group">
-                    <input type="text" name="user" placeholder="Usuario (dueño)" required>
-                </div>
-                <div class="input-group">
-                    <input type="password" name="pass" placeholder="Contraseña" required>
-                </div>
+                <div class="input-group"><input type="text" name="user" placeholder="Usuario (dueño)" required></div>
+                <div class="input-group"><input type="password" name="pass" placeholder="Contraseña" required></div>
                 <button type="submit" class="btn-submit">Ingresar</button>
             </form>
-            
-            <div class="help-text">
-                Acceso cifrado. Panel Central protegido para la seguridad de la plataforma.
-            </div>
+            <div class="help-text">Acceso cifrado. Panel Central protegido para la seguridad de la plataforma.</div>
         </div>
     </body>
     </html>
@@ -475,11 +415,9 @@ app.get('/dash', async (req, res) => {
                     <div class="plat-stats">
                         <span>Estado</span>
                         <div class="line" style="background: ${plat.color};"></div>
-                        <small>Códigos activos: 145/200</small>
                     </div>
                     <div class="plat-actions">
                         <button class="btn-dark-blue" onclick="openTab('panel-${key}')">Consulta tu plataforma</button>
-                        <button class="btn-light-pill" onclick="openTab('panel-${key}')">Consultar códigos</button>
                     </div>
                 </div>`;
             });
@@ -498,7 +436,6 @@ app.get('/dash', async (req, res) => {
                 </div>
                 <div class="plat-actions">
                     <button class="btn-dark-blue" onclick="openTab('panel-gmail')">Consulta tu plataforma</button>
-                    <button class="btn-light-pill" onclick="openTab('panel-gmail')">Consultar códigos</button>
                 </div>
             </div>`;
 
@@ -561,15 +498,27 @@ app.get('/dash', async (req, res) => {
                 actividadesHtml = `<div class="activity-item"><span>No hay actividades recientes.</span></div>`;
             }
             
-            let clientesOpcionesHtml = usuarios.filter(u => u.rol === 'Cliente').map(u => `<option value="${u.id}">${u.user}</option>`).join('');
+            // LOGICA PARA SELECT DE ASIGNACIÓN
+            let clientesOpcionesHtml = "";
+            if (esAdminPrincipal) {
+                clientesOpcionesHtml = usuarios.filter(u => u.rol !== 'Administrador' && u.user !== 'ruben').map(u => `<option value="${u.id}">${u.user} (${u.rol})</option>`).join('');
+            } else if (esSubAdmin) {
+                clientesOpcionesHtml = usuarios.filter(u => u.creado_por === req.session.uid).map(u => `<option value="${u.id}">${u.user} (Cliente)</option>`).join('');
+            }
 
             let terminoBusqueda = (req.query.buscar_dueno || "").trim().toLowerCase();
             let tablaUsuariosHtml = "";
             
             if (esAdminPrincipal || esSubAdmin) {
-                let usuariosVisibles = esAdminPrincipal 
-                    ? usuarios.filter(u => u.user !== 'ruben') 
-                    : usuarios.filter(u => u.creado_por === req.session.uid);
+                let usuariosVisibles = [];
+                
+                if (esAdminPrincipal) {
+                    usuariosVisibles = usuarios.filter(u => u.user !== 'ruben');
+                } else if (esSubAdmin) {
+                    usuariosVisibles = usuarios.filter(u => u.creado_por === req.session.uid);
+                    // Añadir el inventario propio del Subadmin como primera fila
+                    usuariosVisibles.unshift({ id: req.session.uid, user: '📦 MI INVENTARIO (Correos sin asignar)', rol: 'Subadministrador', creado_por: null });
+                }
 
                 if (usuariosVisibles.length === 0) {
                     tablaUsuariosHtml = "<tr><td colspan='4' style='padding: 15px; text-align: center;'>No tienes clientes asignados.</td></tr>";
@@ -583,15 +532,21 @@ app.get('/dash', async (req, res) => {
                                 let esBuscado = terminoBusqueda && c.email.toLowerCase().includes(terminoBusqueda);
                                 let estiloFondo = esBuscado ? "background: #fee2e2; border: 1px solid #ef4444;" : "background: #f1f5f9;";
                                 
-                                // LOGICA DE CENSURA APLICADA AQUÍ
+                                // LOGICA DE CENSURA Y VISIBILIDAD DE INVENTARIO
                                 let correoMostrar = c.email;
                                 if (!esAdminPrincipal) {
-                                    let partes = c.email.split('@');
-                                    if (partes.length === 2) {
-                                        let nombreCorto = partes[0].substring(0, 3) + '*****';
-                                        correoMostrar = nombreCorto + '@' + partes[1];
+                                    // Si es Subadmin viendo su propio inventario, no se censura
+                                    if (esSubAdmin && c.user_id === req.session.uid) {
+                                        correoMostrar = c.email;
                                     } else {
-                                        correoMostrar = '***Oculto***';
+                                        // Si es Subadmin viendo correos de un Cliente, se censura
+                                        let partes = c.email.split('@');
+                                        if (partes.length === 2) {
+                                            let nombreCorto = partes[0].substring(0, 3) + '*****';
+                                            correoMostrar = nombreCorto + '@' + partes[1];
+                                        } else {
+                                            correoMostrar = '***Oculto***';
+                                        }
                                     }
                                 }
 
@@ -607,20 +562,23 @@ app.get('/dash', async (req, res) => {
                             listaCorreosHtml = "<span style='color:var(--text-muted); font-size:11px;'>Sin correos asignados</span>";
                         }
 
+                        let nombreFormateado = u.user === '📦 MI INVENTARIO (Correos sin asignar)' ? `<span style="color:#10b981; font-weight:800;">${u.user}</span>` : u.user;
+
                         tablaUsuariosHtml += `
                         <tr style="border-bottom: 1px solid var(--border-soft);">
-                            <td style="padding: 15px; font-weight: 600; vertical-align: top;">${u.user} <br><small style="color:var(--text-muted); font-weight:400;">${u.rol}</small></td>
+                            <td style="padding: 15px; font-weight: 600; vertical-align: top;">${nombreFormateado} <br><small style="color:var(--text-muted); font-weight:400;">${u.rol}</small></td>
                             <td style="padding: 15px; vertical-align: top;">
                                 <div style="max-height: 150px; overflow-y: auto; padding-right: 5px;">
                                     ${listaCorreosHtml}
                                 </div>
                             </td>
-                            <td style="padding: 15px; font-size: 12px; vertical-align: top;">${esAdminPrincipal && u.creado_por ? `ID Creador: ${u.creado_por}` : 'Tú'}</td>
+                            <td style="padding: 15px; font-size: 12px; vertical-align: top;">${esAdminPrincipal && u.creado_por ? `ID Creador: ${u.creado_por}` : (u.creado_por === null ? '-' : 'Tú')}</td>
                             <td style="padding: 15px; vertical-align: top; text-align: center;">
-                                <form action="/admin/eliminar-usuario" method="POST" onsubmit="return confirm('¿Seguro que deseas eliminar a este usuario y todos sus correos?');" style="margin:0;">
+                                ${u.user === '📦 MI INVENTARIO (Correos sin asignar)' ? '' : `
+                                <form action="/admin/eliminar-usuario" method="POST" onsubmit="return confirm('¿Seguro que deseas eliminar a este usuario y todos sus correos de forma permanente?');" style="margin:0;">
                                     <input type="hidden" name="user_id" value="${u.id}">
                                     <button type="submit" style="background:#fee2e2; color:#ef4444; border:none; padding:6px 12px; border-radius:8px; font-size:11px; font-weight:bold; cursor:pointer;">Eliminar</button>
-                                </form>
+                                </form>`}
                             </td>
                         </tr>`;
                     });
@@ -669,24 +627,28 @@ app.get('/dash', async (req, res) => {
                     </div>
 
                     <div id="panel-usuarios" class="main-card">
-                        <h3>Gestión de Accesos a Correos</h3>
-                        <p style="color:#64748b; font-size:13px; margin-bottom: 20px;">Pega los correos separados por espacio para asignarlos de forma masiva (Hasta 500 correos).</p>
+                        <h3>Gestión de Asignación de Correos</h3>
+                        <p style="color:#64748b; font-size:13px; margin-bottom: 20px;">
+                            ${esAdminPrincipal 
+                                ? 'Asigna correos nuevos a subadministradores o clientes. El sistema bloqueará duplicados (cada correo es único en el sistema).' 
+                                : 'Asigna correos de TU inventario a tus clientes. Al asignarlo, dejará de estar en tu inventario y quedará ocupado por el cliente.'}
+                        </p>
                         
                         <form action="/admin/asignar-correo" method="POST" style="margin-bottom: 25px;">
                             <select name="user_id" class="input-classic" required>
-                                <option value="" disabled selected>Selecciona un cliente...</option>
+                                <option value="" disabled selected>Selecciona un destinatario...</option>
                                 ${clientesOpcionesHtml}
                             </select>
                             <textarea name="email" class="input-classic" placeholder="ejemplo1@gmail.com ejemplo2@gmail.com ..." rows="4" required style="resize: vertical;"></textarea>
-                            <button type="submit" class="btn-submit">Asignar Correos al Cliente</button>
+                            <button type="submit" class="btn-submit">Asignar Correos</button>
                         </form>
                         
-                        <a href="/admin/logout-todos" style="color:red; font-size:12px; text-decoration: none; font-weight: bold;">🛑 Desconectar a todos los usuarios</a>
+                        ${esAdminPrincipal ? `<a href="/admin/logout-todos" style="color:red; font-size:12px; text-decoration: none; font-weight: bold;">🛑 Desconectar a todos los usuarios</a>` : ''}
                     </div>
 
                     <div id="panel-base-datos" class="main-card">
-                        <h3>Base de Usuarios y Correos Asignados</h3>
-                        <p style="color:#64748b; font-size:13px; margin-bottom: 15px;">Resumen de clientes y fechas de asignación de cuentas.</p>
+                        <h3>Base de Usuarios e Inventario</h3>
+                        <p style="color:#64748b; font-size:13px; margin-bottom: 15px;">Control de stock y clientes.</p>
                         
                         <form action="/dash" method="GET" style="margin-bottom: 20px; display: flex; gap: 10px;">
                             <input type="text" name="buscar_dueno" value="${terminoBusqueda}" class="input-classic" placeholder="🔍 Escribe un correo para buscar a su dueño..." style="margin:0; font-size:13px; padding: 10px 15px;">
@@ -697,8 +659,8 @@ app.get('/dash', async (req, res) => {
                             <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
                                 <thead style="background: var(--btn-light);">
                                     <tr>
-                                        <th style="padding: 15px; color: var(--text-dark);">Usuario</th>
-                                        <th style="padding: 15px; color: var(--text-dark); width: 50%;">Correos y Vencimiento (Con Scroll)</th>
+                                        <th style="padding: 15px; color: var(--text-dark);">Usuario / Stock</th>
+                                        <th style="padding: 15px; color: var(--text-dark); width: 50%;">Correos Asignados</th>
                                         <th style="padding: 15px; color: var(--text-dark);">Creado Por</th>
                                         <th style="padding: 15px; color: var(--text-dark); text-align: center;">Acción</th>
                                     </tr>
@@ -731,8 +693,8 @@ app.get('/dash', async (req, res) => {
                         <div class="menu-list">
                             ${(esAdminPrincipal || esSubAdmin) ? `
                             <button class="menu-btn-item" onclick="openTab('panel-crear-user')">🔍 Crear Nuevo Usuario</button>
-                            <button class="menu-btn-item" onclick="openTab('panel-usuarios')">🗄️ Asignar Correos</button>
-                            <button class="menu-btn-item" onclick="openTab('panel-base-datos')">👥 Ver Base de Usuarios</button>
+                            <button class="menu-btn-item" onclick="openTab('panel-usuarios')">🗄️ Asignar / Distribuir Correos</button>
+                            <button class="menu-btn-item" onclick="openTab('panel-base-datos')">👥 Ver Inventario y Clientes</button>
                             ` : ''}
                             <button class="menu-btn-item" onclick="alert('Historial completo en desarrollo')">🔒 Historial de Códigos</button>
                         </div>
@@ -756,17 +718,62 @@ app.post('/admin/crear', async (req, res) => {
     try { await dbRun("INSERT INTO usuarios (user, pass, rol, creado_por) VALUES (?, ?, ?, ?)", [req.body.n, req.body.c, req.body.r, creado_por]); res.redirect('/dash'); } catch(err) { res.redirect('/dash'); }
 });
 
+// LOGICA DE ASIGNACIÓN ESTRICTA (NUEVA)
 app.post('/admin/asignar-correo', async (req, res) => {
     if (req.session.rol === 'Cliente') return res.redirect('/dash');
+    
     try {
         const correosBrutos = req.body.email.trim();
-        const listaCorreos = correosBrutos.split(/[\s,]+/).filter(e => e.includes('@'));
+        // Elimina duplicados dentro del mismo textarea que pegó el usuario
+        const listaCorreos = [...new Set(correosBrutos.split(/[\s,]+/).filter(e => e.includes('@')).map(e => e.toLowerCase()))];
+        const targetUserId = req.body.user_id;
+        
+        let asignados = 0;
+        let fallidos = [];
 
-        for (let email of listaCorreos) {
-            await dbRun("INSERT INTO correos (email, user_id) VALUES (?, ?)", [email.toLowerCase(), req.body.user_id]);
+        if (req.session.rol === 'Administrador' || req.session.user === 'ruben') {
+            // ADMIN PRINCIPAL: Asigna correos nuevos al sistema
+            for (let email of listaCorreos) {
+                // Verifica si el correo ya existe en CUALQUIER lugar de la base de datos
+                const existe = await dbGet("SELECT id FROM correos WHERE email = ?", [email]);
+                if (existe) {
+                    fallidos.push(email); // Bloqueo: El correo ya existe
+                } else {
+                    await dbRun("INSERT INTO correos (email, user_id) VALUES (?, ?)", [email, targetUserId]);
+                    asignados++;
+                }
+            }
+        } else if (req.session.rol === 'Subadministrador') {
+            // SUBADMINISTRADOR: Mueve correos de su inventario a un cliente suyo
+            // Primero asegura que el target sea SU cliente
+            const clienteValid = await dbGet("SELECT id FROM usuarios WHERE id = ? AND creado_por = ?", [targetUserId, req.session.uid]);
+            if (!clienteValid) return res.send("<script>alert('Error: El usuario destino no es tu cliente.'); window.location='/dash';</script>");
+            
+            for (let email of listaCorreos) {
+                // Verifica si el Subadmin es dueño de ese correo en su inventario
+                const esDueno = await dbGet("SELECT id FROM correos WHERE email = ? AND user_id = ?", [email, req.session.uid]);
+                if (esDueno) {
+                    // Si es suyo, se lo quita y se lo pasa al cliente (Update)
+                    await dbRun("UPDATE correos SET user_id = ?, fecha_asignacion = date('now', 'localtime') WHERE id = ?", [targetUserId, esDueno.id]);
+                    asignados++;
+                } else {
+                    fallidos.push(email); // Bloqueo: No lo tiene en su stock o ya lo asignó
+                }
+            }
         }
+
+        // Genera un reporte de la transacción
+        let msg = `✅ Se asignaron ${asignados} correos exitosamente.`;
+        if (fallidos.length > 0) {
+            msg += `\\n\\n❌ BLOQUEADOS: No se pudieron asignar ${fallidos.length} correos (ya están en uso, duplicados o no te pertenecen):\\n${fallidos.join(', ')}`;
+        }
+        
+        res.send(`<script>alert('${msg}'); window.location='/dash';</script>`);
+        
+    } catch(err) { 
+        console.error(err);
         res.redirect('/dash'); 
-    } catch(err) { res.redirect('/dash'); }
+    }
 });
 
 app.post('/admin/eliminar-correo', async (req, res) => {
