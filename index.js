@@ -128,10 +128,11 @@ const CSS_MODERNO = `
     }
 
     .platforms-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    
     .plat-card {
-        background: var(--card-bg); border-radius: var(--radius-card); padding: 25px 20px;
-        box-shadow: var(--shadow-soft); display: flex; flex-direction: column; gap: 15px;
-        position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,0.5);
+        border-radius: var(--radius-card); padding: 25px 20px;
+        display: flex; flex-direction: column; gap: 15px;
+        position: relative; overflow: hidden;
     }
     .plat-header { display: flex; justify-content: space-between; align-items: flex-start; z-index: 2; position: relative; }
     
@@ -141,15 +142,13 @@ const CSS_MODERNO = `
     .status-ok { background: var(--green-ok); color: white; font-size: 10px; font-weight: 800; padding: 4px 8px; border-radius: 50px; box-shadow: 0 4px 10px rgba(34, 197, 94, 0.3); }
     
     .plat-stats { z-index: 2; position: relative; margin-top: 10px; }
-    .plat-stats span { display: block; font-size: 13px; font-weight: 600; color: var(--text-dark); margin-bottom: 5px; }
+    .plat-stats span { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; }
     .plat-stats .line { height: 2px; width: 100%; border-radius: 2px; margin-bottom: 8px; }
-    .plat-stats small { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+    .plat-stats small { font-size: 12px; font-weight: 500; }
 
     .plat-actions { display: flex; flex-direction: column; gap: 8px; z-index: 2; position: relative; margin-top: auto; }
-    .btn-dark-blue { background: var(--btn-dark); color: white; border: none; padding: 12px; border-radius: 12px; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+    .btn-dark-blue { border: none; padding: 12px; border-radius: 12px; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; }
     .btn-dark-blue:hover { opacity: 0.9; transform: translateY(-2px); }
-    .btn-light-pill { background: var(--btn-light); color: var(--text-dark); border: none; padding: 12px; border-radius: 12px; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; }
-    .btn-light-pill:hover { background: #e2e8f0; }
 
     .center-panel { display: flex; flex-direction: column; gap: 25px; }
     .main-card {
@@ -406,36 +405,38 @@ app.get('/dash', async (req, res) => {
             Object.keys(PLATAFORMAS).forEach(key => {
                 let plat = PLATAFORMAS[key];
                 plataformasCardsHtml += `
-                <div class="plat-card">
-                    <div style="position:absolute; top:-50px; right:-50px; width:150px; height:150px; background:radial-gradient(circle, ${plat.alpha} 0%, transparent 70%); border-radius:50%; pointer-events:none;"></div>
+                <div class="plat-card" style="background: #000000; box-shadow: 0 0 20px ${plat.alpha}; border: 1px solid ${plat.color}40;">
+                    <div style="position:absolute; top:-50px; right:-50px; width:150px; height:150px; background:radial-gradient(circle, ${plat.color} 0%, transparent 70%); border-radius:50%; pointer-events:none; opacity: 0.25;"></div>
+                    <div style="position:absolute; bottom:-30px; left:-30px; width:100px; height:100px; background:radial-gradient(circle, ${plat.color} 0%, transparent 70%); border-radius:50%; pointer-events:none; opacity: 0.15;"></div>
                     <div class="plat-header">
-                        <img src="${plat.logo}" alt="${plat.nombre}" class="plat-logo" style="filter: drop-shadow(0px 0px 10px ${plat.color});">
+                        <img src="${plat.logo}" alt="${plat.nombre}" class="plat-logo" style="filter: drop-shadow(0px 0px 8px ${plat.color});">
                         <span class="status-ok">DE ACUERDO</span>
                     </div>
                     <div class="plat-stats">
-                        <span>Estado</span>
-                        <div class="line" style="background: ${plat.color};"></div>
+                        <span style="color: #ffffff;">Estado</span>
+                        <div class="line" style="background: ${plat.color}; box-shadow: 0 0 10px ${plat.color};"></div>
                     </div>
                     <div class="plat-actions">
-                        <button class="btn-dark-blue" onclick="openTab('panel-${key}')">Consulta tu plataforma</button>
+                        <button class="btn-dark-blue" onclick="openTab('panel-${key}')" style="background: #1e293b; color: white;">Consulta tu plataforma</button>
                     </div>
                 </div>`;
             });
 
             plataformasCardsHtml += `
-            <div class="plat-card">
-                <div style="position:absolute; top:-50px; right:-50px; width:150px; height:150px; background:radial-gradient(circle, rgba(234, 67, 53, 0.08) 0%, transparent 70%); border-radius:50%; pointer-events:none;"></div>
+            <div class="plat-card" style="background: #000000; box-shadow: 0 0 20px rgba(234, 67, 53, 0.08); border: 1px solid rgba(234, 67, 53, 0.4);">
+                <div style="position:absolute; top:-50px; right:-50px; width:150px; height:150px; background:radial-gradient(circle, #ea4335 0%, transparent 70%); border-radius:50%; pointer-events:none; opacity: 0.25;"></div>
+                <div style="position:absolute; bottom:-30px; left:-30px; width:100px; height:100px; background:radial-gradient(circle, #ea4335 0%, transparent 70%); border-radius:50%; pointer-events:none; opacity: 0.15;"></div>
                 <div class="plat-header">
-                    <span style="font-weight: 800; font-size: 16px; color: #ea4335;">GMAIL</span>
+                    <span style="font-weight: 800; font-size: 16px; color: #ffffff; text-shadow: 0 0 10px #ea4335;">GMAIL</span>
                     <span class="status-ok">DE ACUERDO</span>
                 </div>
                 <div class="plat-stats">
-                    <span>Buzón Central</span>
-                    <div class="line" style="background: #ea4335;"></div>
-                    <small>aniketseller2@gmail.com</small>
+                    <span style="color: #ffffff;">Buzón Central</span>
+                    <div class="line" style="background: #ea4335; box-shadow: 0 0 10px #ea4335;"></div>
+                    <small style="color: #cbd5e1;">aniketseller2@gmail.com</small>
                 </div>
                 <div class="plat-actions">
-                    <button class="btn-dark-blue" onclick="openTab('panel-gmail')">Consulta tu plataforma</button>
+                    <button class="btn-dark-blue" onclick="openTab('panel-gmail')" style="background: #1e293b; color: white;">Consulta tu plataforma</button>
                 </div>
             </div>`;
 
@@ -466,7 +467,6 @@ app.get('/dash', async (req, res) => {
                                 🔁 Usar <strong>@ghoulflix.com</strong>
                             </div>
                         </div>
-
                     </form>
                 </div>`;
             });
@@ -498,7 +498,6 @@ app.get('/dash', async (req, res) => {
                 actividadesHtml = `<div class="activity-item"><span>No hay actividades recientes.</span></div>`;
             }
             
-            // LOGICA PARA SELECT DE ASIGNACIÓN
             let clientesOpcionesHtml = "";
             if (esAdminPrincipal) {
                 clientesOpcionesHtml = usuarios.filter(u => u.rol !== 'Administrador' && u.user !== 'ruben').map(u => `<option value="${u.id}">${u.user} (${u.rol})</option>`).join('');
@@ -516,7 +515,6 @@ app.get('/dash', async (req, res) => {
                     usuariosVisibles = usuarios.filter(u => u.user !== 'ruben');
                 } else if (esSubAdmin) {
                     usuariosVisibles = usuarios.filter(u => u.creado_por === req.session.uid);
-                    // Añadir el inventario propio del Subadmin como primera fila
                     usuariosVisibles.unshift({ id: req.session.uid, user: '📦 MI INVENTARIO (Correos sin asignar)', rol: 'Subadministrador', creado_por: null });
                 }
 
@@ -532,14 +530,11 @@ app.get('/dash', async (req, res) => {
                                 let esBuscado = terminoBusqueda && c.email.toLowerCase().includes(terminoBusqueda);
                                 let estiloFondo = esBuscado ? "background: #fee2e2; border: 1px solid #ef4444;" : "background: #f1f5f9;";
                                 
-                                // LOGICA DE CENSURA Y VISIBILIDAD DE INVENTARIO
                                 let correoMostrar = c.email;
                                 if (!esAdminPrincipal) {
-                                    // Si es Subadmin viendo su propio inventario, no se censura
                                     if (esSubAdmin && c.user_id === req.session.uid) {
                                         correoMostrar = c.email;
                                     } else {
-                                        // Si es Subadmin viendo correos de un Cliente, se censura
                                         let partes = c.email.split('@');
                                         if (partes.length === 2) {
                                             let nombreCorto = partes[0].substring(0, 3) + '*****';
@@ -630,8 +625,8 @@ app.get('/dash', async (req, res) => {
                         <h3>Gestión de Asignación de Correos</h3>
                         <p style="color:#64748b; font-size:13px; margin-bottom: 20px;">
                             ${esAdminPrincipal 
-                                ? 'Asigna correos nuevos a subadministradores o clientes. El sistema bloqueará duplicados (cada correo es único en el sistema).' 
-                                : 'Asigna correos de TU inventario a tus clientes. Al asignarlo, dejará de estar en tu inventario y quedará ocupado por el cliente.'}
+                                ? 'Asigna correos nuevos a subadministradores o clientes. El sistema bloqueará duplicados.' 
+                                : 'Asigna correos de TU inventario a tus clientes. Al asignarlo, dejará de estar en tu inventario.'}
                         </p>
                         
                         <form action="/admin/asignar-correo" method="POST" style="margin-bottom: 25px;">
@@ -681,12 +676,13 @@ app.get('/dash', async (req, res) => {
                 </div>
 
                 <div class="right-sidebar">
+                    ${esAdminPrincipal ? `
                     <div class="side-card">
                         <h4>Últimas Actividades</h4>
                         <div class="activity-list">
                             ${actividadesHtml}
                         </div>
-                    </div>
+                    </div>` : ''}
 
                     <div class="side-card">
                         <h4>Gestión del Sistema</h4>
@@ -718,13 +714,11 @@ app.post('/admin/crear', async (req, res) => {
     try { await dbRun("INSERT INTO usuarios (user, pass, rol, creado_por) VALUES (?, ?, ?, ?)", [req.body.n, req.body.c, req.body.r, creado_por]); res.redirect('/dash'); } catch(err) { res.redirect('/dash'); }
 });
 
-// LOGICA DE ASIGNACIÓN ESTRICTA (NUEVA)
 app.post('/admin/asignar-correo', async (req, res) => {
     if (req.session.rol === 'Cliente') return res.redirect('/dash');
     
     try {
         const correosBrutos = req.body.email.trim();
-        // Elimina duplicados dentro del mismo textarea que pegó el usuario
         const listaCorreos = [...new Set(correosBrutos.split(/[\s,]+/).filter(e => e.includes('@')).map(e => e.toLowerCase()))];
         const targetUserId = req.body.user_id;
         
@@ -732,37 +726,30 @@ app.post('/admin/asignar-correo', async (req, res) => {
         let fallidos = [];
 
         if (req.session.rol === 'Administrador' || req.session.user === 'ruben') {
-            // ADMIN PRINCIPAL: Asigna correos nuevos al sistema
             for (let email of listaCorreos) {
-                // Verifica si el correo ya existe en CUALQUIER lugar de la base de datos
                 const existe = await dbGet("SELECT id FROM correos WHERE email = ?", [email]);
                 if (existe) {
-                    fallidos.push(email); // Bloqueo: El correo ya existe
+                    fallidos.push(email); 
                 } else {
                     await dbRun("INSERT INTO correos (email, user_id) VALUES (?, ?)", [email, targetUserId]);
                     asignados++;
                 }
             }
         } else if (req.session.rol === 'Subadministrador') {
-            // SUBADMINISTRADOR: Mueve correos de su inventario a un cliente suyo
-            // Primero asegura que el target sea SU cliente
             const clienteValid = await dbGet("SELECT id FROM usuarios WHERE id = ? AND creado_por = ?", [targetUserId, req.session.uid]);
             if (!clienteValid) return res.send("<script>alert('Error: El usuario destino no es tu cliente.'); window.location='/dash';</script>");
             
             for (let email of listaCorreos) {
-                // Verifica si el Subadmin es dueño de ese correo en su inventario
                 const esDueno = await dbGet("SELECT id FROM correos WHERE email = ? AND user_id = ?", [email, req.session.uid]);
                 if (esDueno) {
-                    // Si es suyo, se lo quita y se lo pasa al cliente (Update)
                     await dbRun("UPDATE correos SET user_id = ?, fecha_asignacion = date('now', 'localtime') WHERE id = ?", [targetUserId, esDueno.id]);
                     asignados++;
                 } else {
-                    fallidos.push(email); // Bloqueo: No lo tiene en su stock o ya lo asignó
+                    fallidos.push(email); 
                 }
             }
         }
 
-        // Genera un reporte de la transacción
         let msg = `✅ Se asignaron ${asignados} correos exitosamente.`;
         if (fallidos.length > 0) {
             msg += `\\n\\n❌ BLOQUEADOS: No se pudieron asignar ${fallidos.length} correos (ya están en uso, duplicados o no te pertenecen):\\n${fallidos.join(', ')}`;
@@ -890,10 +877,26 @@ app.post('/buscar', async (req, res) => {
     try {
         let correoIngresado = (email_search || "").trim().toLowerCase();
         
-        if (req.session.rol === 'Cliente' && plataforma !== 'gmail') {
-            const permiso = await dbGet("SELECT id FROM correos WHERE email = ? AND user_id = ?", [correoIngresado, req.session.uid]);
-            if (!permiso) {
-                return res.send(`${cssIframe}<div style="text-align:center; padding:40px;"><h2 style="color:#ef4444;">⛔ Acceso Denegado</h2><p>No tienes autorización para buscar códigos o leer mensajes de este correo.</p></div>`);
+        // BLOQUEO ESTRICTO DE BÚSQUEDA PARA CLIENTES Y SUBADMINISTRADORES
+        if (req.session.rol !== 'Administrador' && req.session.user !== 'ruben' && plataforma !== 'gmail') {
+            let accesoPermitido = false;
+            
+            if (req.session.rol === 'Cliente') {
+                const permiso = await dbGet("SELECT id FROM correos WHERE email = ? AND user_id = ?", [correoIngresado, req.session.uid]);
+                if (permiso) accesoPermitido = true;
+            } else if (req.session.rol === 'Subadministrador') {
+                // Verifica si el correo está en su inventario o si lo asignó a alguno de sus clientes
+                const permisoSub = await dbGet(`
+                    SELECT c.id FROM correos c 
+                    LEFT JOIN usuarios u ON c.user_id = u.id 
+                    WHERE c.email = ? AND (c.user_id = ? OR u.creado_por = ?)
+                `, [correoIngresado, req.session.uid, req.session.uid]);
+                
+                if (permisoSub) accesoPermitido = true;
+            }
+
+            if (!accesoPermitido) {
+                return res.send(`${cssIframe}<div style="text-align:center; padding:40px;"><h2 style="color:#ef4444;">⛔ Acceso Denegado</h2><p>No tienes autorización para buscar o leer mensajes de este correo. No te pertenece o no te ha sido asignado por el administrador.</p></div>`);
             }
         }
 
