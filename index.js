@@ -387,7 +387,7 @@ app.get('/dash', async (req, res) => {
                             <option value="acceso_temporal">Tu código de acceso temporal</option>
                             <option value="actualizar_hogar">¿Solicitaste actualizar tu Hogar con Netflix?</option>
                             <option value="verificacion">Código de verificación. Caduca en 15 minutos</option>
-                            <option value="password">Restablecer contraseña</option>
+                            <option value="password">Complete su solicitud de restablecimiento de contraseña</option>
                             <option value="pais">Mostrar país</option>
                         </select>
                     </div>
@@ -652,7 +652,10 @@ async function buscarEnBuzonImap(correoBuzon, correoIngresado, plataforma, parte
                     case 'acceso_temporal': queryStr += ` "código de acceso temporal"`; break;
                     case 'actualizar_hogar': queryStr += ` "¿Solicitaste actualizar tu Hogar con Netflix?" OR "Hogar"`; break;
                     case 'verificacion': queryStr += ` "Código de verificación" OR "vence en 15 minutos"`; break;
-                    case 'password': queryStr += ` "Restablecer contraseña"`; break;
+                    case 'password': 
+                        // Uso de múltiples variantes para soportar diferentes idiomas asegurando el funcionamiento universal
+                        queryStr += ` ("Complete su solicitud" OR "restablecimiento de contraseña" OR "password reset" OR "reset your password" OR "redefinir senha" OR "recuperar contraseña")`; 
+                        break;
                 }
             }
 
