@@ -378,25 +378,23 @@ app.get('/dash', async (req, res) => {
                 let plat = PLATAFORMAS[key];
                 let controlesNavegacion = "";
 
-                // 🔥 AQUÍ ESTÁ EL CAMBIO PARA ELIMINAR LOS 3 BOTONES SOLO EN NETFLIX 🔥
                 if (key === 'netflix') {
                     controlesNavegacion = `
                     <div class="action-row" style="flex-wrap: wrap; margin-bottom: 15px;">
                         <select name="accion" class="input-classic" style="width: 100%; border-radius: 50px; padding: 16px 25px; margin-bottom: 0;" required>
                             <option value="" disabled selected>Elige la opción que necesitas buscar...</option>
                             <option value="inicio">Tu código de inicio de sesión</option>
-                            <option value="hogar">Hogar / actualizar tu cuenta de Netflix en casa</option>
+                            <option value="acceso_temporal">Tu código de acceso temporal</option>
+                            <option value="actualizar_hogar">¿Solicitaste actualizar tu Hogar con Netflix?</option>
                             <option value="verificacion">Código de verificación. Caduca en 15 minutos</option>
                             <option value="password">Restablecer contraseña</option>
                             <option value="pais">Mostrar país</option>
-                            <option value="identificacion">Tu código de identificación</option>
                         </select>
                     </div>
                     <div class="action-row">
                         <button type="submit" class="action-btn-pill" style="background: #E50914; color: white; border: none; font-size: 13px;">🔎 Buscar Opción en el Correo</button>
                     </div>`;
                 } else {
-                    // Para Disney, Crunchyroll y Spotify siguen los 3 botones normales
                     controlesNavegacion = `
                     <div class="action-row">
                         <button type="submit" name="accion" value="mensaje" class="action-btn-pill">Leer Mensaje</button>
@@ -651,10 +649,10 @@ async function buscarEnBuzonImap(correoBuzon, correoIngresado, plataforma, parte
             if (plataforma === 'netflix') {
                 switch(accion) {
                     case 'inicio': queryStr += ` "inicio de sesión"`; break;
-                    case 'hogar': queryStr += ` "Actualizar tu página de inicio" OR "Hogar"`; break;
+                    case 'acceso_temporal': queryStr += ` "código de acceso temporal"`; break;
+                    case 'actualizar_hogar': queryStr += ` "¿Solicitaste actualizar tu Hogar con Netflix?" OR "Hogar"`; break;
                     case 'verificacion': queryStr += ` "Código de verificación" OR "vence en 15 minutos"`; break;
                     case 'password': queryStr += ` "Restablecer contraseña"`; break;
-                    case 'identificacion': queryStr += ` "código de identificación"`; break;
                 }
             }
 
@@ -734,7 +732,7 @@ app.post('/buscar', async (req, res) => {
             return res.send(`${cssIframe}<div style="text-align:center; padding: 20px;"><h2>Escáner de Direcciones IP</h2><p style="color: #94a3b8;">${email_search}</p><div style="margin: 20px auto; padding: 25px; background:rgba(255,255,255,0.05); border-radius:12px; display:inline-block; border: 1px solid rgba(255,255,255,0.1);">${ipContenido}</div></div>`);
         }
 
-        if (/\b\d{4}\b/.test(textoBruto) && (!accion || accion === 'mensaje' || plataforma === 'netflix' || accion === 'inicio' || accion === 'hogar' || accion === 'verificacion')) {
+        if (/\b\d{4,6}\b/.test(textoBruto) && plataforma === 'netflix') {
             try { await dbRun("INSERT INTO registro_codigos (user, email_buscado) VALUES (?, ?)", [req.session.user, email_search.trim()]); } catch(err) {}
         }
         
