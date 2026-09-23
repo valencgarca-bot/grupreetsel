@@ -223,22 +223,6 @@ const CSS_MODERNO = `
 </style>
 
 <script>
-    function verificarHotmail(inputElem, platKey) {
-        let valor = inputElem.value.toLowerCase();
-        let sugerencia = document.getElementById('sugerencia_ghoulflix_' + platKey);
-        if (sugerencia) {
-            sugerencia.style.display = valor.includes('@hotmail.com') ? 'inline-flex' : 'none';
-        }
-    }
-    function cambiarDominio(platKey) {
-        let inputElem = document.getElementById('email_search_' + platKey);
-        let valor = inputElem.value.toLowerCase();
-        if (valor.includes('@hotmail.com')) {
-            inputElem.value = valor.replace('@hotmail.com', '@ghoulflix.com');
-            document.getElementById('sugerencia_ghoulflix_' + platKey).style.display = 'none';
-            inputElem.focus();
-        }
-    }
     function openTab(tabId) {
         document.querySelectorAll('.main-card').forEach(p => p.classList.remove('active'));
         let selectedTab = document.getElementById(tabId);
@@ -382,19 +366,8 @@ app.get('/dash', async (req, res) => {
 
                 if (key === 'netflix') {
                     controlesNavegacion = `
-                    <div class="action-row" style="flex-wrap: wrap; margin-bottom: 15px;">
-                        <select name="accion" class="input-classic" style="width: 100%; border-radius: 50px; padding: 16px 25px; margin-bottom: 0;" required>
-                            <option value="" disabled selected>Elige la opción que necesitas buscar...</option>
-                            <option value="inicio">Tu código de inicio de sesión</option>
-                            <option value="acceso_temporal">Tu código de acceso temporal</option>
-                            <option value="actualizar_hogar">¿Solicitaste actualizar tu Hogar con Netflix?</option>
-                            <option value="verificacion">Código de verificación. Caduca en 15 minutos</option>
-                            <option value="password">Complete su solicitud de restablecimiento de contraseña</option>
-                            <option value="pais">Mostrar país</option>
-                        </select>
-                    </div>
                     <div class="action-row">
-                        <button type="submit" class="action-btn-pill" style="background: #E50914; color: white; border: none; font-size: 13px;">🔎 Buscar Opción en el Correo</button>
+                        <button type="submit" name="accion" value="mensaje" class="action-btn-pill" style="background: #E50914; color: white; border: none; font-size: 13px;">🔎 Consultar lo último que pidió</button>
                     </div>`;
                 } else {
                     controlesNavegacion = `
@@ -411,7 +384,7 @@ app.get('/dash', async (req, res) => {
                         <img src="${plat.logo}" alt="${plat.nombre}" class="main-card-logo">
                         <div class="main-card-title">
                             <h3>Gestor Central ${plat.nombre}</h3>
-                            <p>Búsqueda avanzada y extracción de códigos optimizada.</p>
+                            <p>Búsqueda rápida del último mensaje recibido.</p>
                         </div>
                     </div>
                     <form action="/buscar" method="POST" target="marco_resultados">
@@ -635,9 +608,10 @@ async function buscarEnBuzonImap(correoBuzon, correoIngresado, plataforma, parte
         let mail = null;
 
         if (esConsultaGmailDirecta) {
-            let searchResults = await connection.search([['ALL']], { bodies: ['HEADER'] });
+            let searchResults = await connection.search([['ALL']], { bodies: ['HEADER.FIELDS (DATE)'] });
             if (searchResults.length > 0) {
-                let latestUid = searchResults[searchResults.length - 1].attributes.uid;
+                searchResults.sort((a, b) => new Date(b.attributes.date || 0) - new Date(a.attributes.date || 0));
+                let latestUid = searchResults[0].attributes.uid;
                 let fetchedMsg = await connection.search([['UID', latestUid]], { bodies: [''], struct: true });
                 if (fetchedMsg.length > 0) {
                     messages = fetchedMsg;
@@ -645,33 +619,16 @@ async function buscarEnBuzonImap(correoBuzon, correoIngresado, plataforma, parte
                 }
             }
         } else {
+            // Búsqueda directa sin el switch, para traer solo el último mensaje de esa plataforma y correo.
             let queryStr = `"${correoIngresado}"`;
             if (keywordPlat) queryStr += ` ${keywordPlat}`;
 
-            if (plataforma === 'netflix') {
-                switch(accion) {
-                    case 'inicio': 
-                        queryStr += ` ("inicio de sesión" OR "sign-in code" OR "código de acesso" OR "sign in to")`; 
-                        break;
-                    case 'acceso_temporal': 
-                        queryStr += ` ("acceso temporal" OR "temporary access" OR "acesso temporário")`; 
-                        break;
-                    case 'actualizar_hogar': 
-                        queryStr += ` ("Hogar" OR "Household" OR "Residência")`; 
-                        break;
-                    case 'verificacion': 
-                        queryStr += ` ("Código de verificación" OR "Verification code" OR "Código de verificação" OR "15 minutos" OR "15 minutes")`; 
-                        break;
-                    case 'password': 
-                        queryStr += ` ("restablecimiento" OR "password reset" OR "reset your password" OR "redefinir senha" OR "recuperar contraseña")`; 
-                        break;
-                }
-            }
-
-            let searchResults = await connection.search([['X-GM-RAW', queryStr]], { bodies: ['HEADER'] });
+            let searchResults = await connection.search([['X-GM-RAW', queryStr]], { bodies: ['HEADER.FIELDS (DATE)'] });
             if (searchResults.length > 0) {
-                searchResults.sort((a, b) => b.attributes.uid - a.attributes.uid);
-                let latestUid = searchResults[0].attributes.uid;
+                // Ordenar por fecha real para ignorar hilos de Gmail
+                searchResults.sort((a, b) => new Date(b.attributes.date || 0) - new Date(a.attributes.date || 0));
+                let latestUid = searchResults[0].attributes.uid; 
+                
                 let fetchedMsg = await connection.search([['UID', latestUid]], { bodies: [''], struct: true });
                 if (fetchedMsg.length > 0) {
                     messages = fetchedMsg;
