@@ -8,8 +8,10 @@ const app = express();
 
 app.use(express.static('public'));
 
-// 💾 SISTEMA DE PERSISTENCIA
-const dbPath = path.resolve(__dirname, 'betflix_mexico_v1.db');
+// 💾 SISTEMA DE PERSISTENCIA (Adaptado para Render Disk)
+const dbDirectory = process.env.RENDER ? '/var/data' : __dirname;
+const dbPath = path.resolve(dbDirectory, 'betflix_mexico_v1.db');
+
 const db = new sqlite3.Database(dbPath, (err) => {
     if (err) {
         console.error("Error al abrir la base de datos persistente", err.message);
