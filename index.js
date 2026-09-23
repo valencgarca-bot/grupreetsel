@@ -9,8 +9,6 @@ const app = express();
 app.use(express.static('public'));
 
 // 💾 SISTEMA DE PERSISTENCIA
-// Nota para despliegues en la nube (ej. Render): 
-// Asegúrate de configurar un "Persistent Disk" y establecer la ruta aquí para evitar que el archivo se borre al actualizar.
 const dbPath = path.resolve(__dirname, 'betflix_mexico_v1.db');
 const db = new sqlite3.Database(dbPath, (err) => {
     if (err) {
@@ -71,7 +69,6 @@ const CSS_MODERNO = `
     }
 
     body { 
-        /* Fondo Cinematográfico Moderno */
         background: url('https://images.unsplash.com/photo-1604147706283-d7119b5b822c?q=80&w=2000&auto=format&fit=crop') center/cover fixed;
         background-color: #020617;
         color: var(--text-main); 
@@ -80,7 +77,6 @@ const CSS_MODERNO = `
         min-height: 100vh;
     }
 
-    /* Capa de oscurecimiento para legibilidad */
     body::before {
         content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
         background: radial-gradient(circle at center, rgba(2, 6, 23, 0.4) 0%, rgba(2, 6, 23, 0.9) 100%);
@@ -213,11 +209,11 @@ const CSS_MODERNO = `
 
     .input-classic { width: 100%; padding: 16px; margin-bottom: 15px; border-radius: 8px; border: 1px solid var(--card-border); background: rgba(0,0,0,0.3); color: white; font-family: 'Inter', sans-serif; box-sizing: border-box; transition: 0.3s; outline: none;}
     .input-classic:focus { border-color: rgba(255,255,255,0.4); }
+    select.input-classic option { background: #0f172a; color: #fff; }
     
     .btn-submit { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 16px; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; transition: 0.3s; text-transform: uppercase; letter-spacing: 1px; font-size: 12px;}
     .btn-submit:hover { background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.5); }
 
-    /* Estilos de tabla elegantes */
     table { width: 100%; border-collapse: separate; border-spacing: 0; }
     table thead th { background: rgba(0,0,0,0.3) !important; border-bottom: 1px solid var(--card-border); padding: 16px; font-weight: 500; text-transform: uppercase; font-size: 11px; letter-spacing: 1px; color: var(--text-muted); }
     table tr td { border-bottom: 1px solid rgba(255,255,255,0.05); padding: 16px; font-size: 13px; color: var(--text-main); }
@@ -282,48 +278,15 @@ app.get('/', (req, res) => {
         <title>Acceso - stremin gunpreetsel</title>
         <style>
             @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
-
-            body {
-                margin: 0; padding: 0; font-family: 'Inter', sans-serif;
-                background: url('https://images.unsplash.com/photo-1604147706283-d7119b5b822c?q=80&w=2000&auto=format&fit=crop') center/cover fixed;
-                background-color: #020617; height: 100vh; display: flex; justify-content: center; align-items: center;
-            }
-            
-            body::before {
-                content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-                background: radial-gradient(circle at center, rgba(2, 6, 23, 0.4) 0%, rgba(2, 6, 23, 0.95) 100%);
-                z-index: 1; pointer-events: none;
-            }
-
-            .login-box {
-                position: relative; z-index: 2;
-                background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(20px);
-                border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px;
-                padding: 50px 40px; width: 100%; max-width: 400px;
-                box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5); box-sizing: border-box; text-align: center;
-            }
-
-            .login-box h2 {
-                color: #ffffff; font-size: 24px; font-weight: 400; letter-spacing: 2px;
-                margin-top: 0; margin-bottom: 35px; text-transform: uppercase;
-            }
-
+            body { margin: 0; padding: 0; font-family: 'Inter', sans-serif; background: url('https://images.unsplash.com/photo-1604147706283-d7119b5b822c?q=80&w=2000&auto=format&fit=crop') center/cover fixed; background-color: #020617; height: 100vh; display: flex; justify-content: center; align-items: center; }
+            body::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, rgba(2, 6, 23, 0.4) 0%, rgba(2, 6, 23, 0.95) 100%); z-index: 1; pointer-events: none; }
+            .login-box { position: relative; z-index: 2; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 50px 40px; width: 100%; max-width: 400px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5); box-sizing: border-box; text-align: center; }
+            .login-box h2 { color: #ffffff; font-size: 24px; font-weight: 400; letter-spacing: 2px; margin-top: 0; margin-bottom: 35px; text-transform: uppercase; }
             .input-group { margin-bottom: 20px; }
-            .input-group input {
-                width: 100%; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.15);
-                color: #ffffff; height: 55px; padding: 0 20px; box-sizing: border-box; font-size: 14px;
-                border-radius: 8px; outline: none; transition: 0.3s;
-            }
+            .input-group input { width: 100%; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; height: 55px; padding: 0 20px; box-sizing: border-box; font-size: 14px; border-radius: 8px; outline: none; transition: 0.3s; }
             .input-group input:focus { border-color: rgba(255, 255, 255, 0.5); background: rgba(0,0,0,0.6); }
-            .input-group input::placeholder { color: #64748b; }
-
-            .btn-submit {
-                width: 100%; background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 13px; font-weight: 600;
-                padding: 18px; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; cursor: pointer;
-                margin-top: 15px; transition: 0.3s; text-transform: uppercase; letter-spacing: 1px;
-            }
+            .btn-submit { width: 100%; background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 13px; font-weight: 600; padding: 18px; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; cursor: pointer; margin-top: 15px; transition: 0.3s; text-transform: uppercase; letter-spacing: 1px; }
             .btn-submit:hover { background: rgba(255, 255, 255, 0.2); border-color: rgba(255,255,255,0.4); }
-
             .help-text { color: #64748b; font-size: 12px; margin-top: 30px; line-height: 1.6; font-weight: 300; }
         </style>
     </head>
@@ -362,12 +325,8 @@ app.get('/logout', (req, res) => {
     res.redirect('/');
 });
 
-app.get('/admin/logout-todos', (req, res) => {
-    if (req.session.user === 'ruben' || req.session.rol === 'Administrador') { req.sessionStore.clear(() => { res.redirect('/'); }); } else { res.redirect('/dash'); }
-});
-
 app.get('/dash', async (req, res) => {
-    const esAdminPrincipal = (req.session.user === 'ruben' || req.session.rol === 'Administrador');
+    const esAdminPrincipal = (req.session.user === 'dueño' || req.session.user === 'ruben');
     const esSubAdmin = (req.session.rol === 'Subadministrador');
 
     if (esAdminPrincipal || esSubAdmin || req.session.rol === 'Cliente') {
@@ -376,7 +335,7 @@ app.get('/dash', async (req, res) => {
             let params = esAdminPrincipal ? [] : [req.session.uid, req.session.uid];
             const usuarios = await dbAll(query, params);
             const correos = await dbAll("SELECT * FROM correos", []);
-            const registros = await dbAll("SELECT * FROM registro_codigos ORDER BY id DESC LIMIT 5", []);[cite: 1]
+            const registros = await dbAll("SELECT * FROM registro_codigos ORDER BY id DESC LIMIT 5", []);
 
             let plataformasCardsHtml = "";
             Object.keys(PLATAFORMAS).forEach(key => {
@@ -417,24 +376,28 @@ app.get('/dash', async (req, res) => {
             let plataformasPanelsHtml = "";
             Object.keys(PLATAFORMAS).forEach(key => {
                 let plat = PLATAFORMAS[key];
-                let actionRowHtml = "";
+                let controlesNavegacion = "";
 
+                // 🔥 AQUÍ ESTÁ EL CAMBIO PARA ELIMINAR LOS 3 BOTONES SOLO EN NETFLIX 🔥
                 if (key === 'netflix') {
-                    actionRowHtml = `
-                    <div style="display: flex; gap: 15px; margin-bottom: 25px; align-items: center;">
-                        <select name="accion" class="input-classic" style="margin-bottom: 0; flex: 2;" required>
-                            <option value="" disabled selected>Selecciona la opción que necesitas...</option>
+                    controlesNavegacion = `
+                    <div class="action-row" style="flex-wrap: wrap; margin-bottom: 15px;">
+                        <select name="accion" class="input-classic" style="width: 100%; border-radius: 50px; padding: 16px 25px; margin-bottom: 0;" required>
+                            <option value="" disabled selected>Elige la opción que necesitas buscar...</option>
                             <option value="inicio">Tu código de inicio de sesión</option>
-                            <option value="hogar">Hogar / Actualizar página de inicio</option>
-                            <option value="verificacion">Código de verificación (15 min)</option>
+                            <option value="hogar">Hogar / actualizar tu cuenta de Netflix en casa</option>
+                            <option value="verificacion">Código de verificación. Caduca en 15 minutos</option>
                             <option value="password">Restablecer contraseña</option>
-                            <option value="identificacion">Tu código de identificación</option>
                             <option value="pais">Mostrar país</option>
+                            <option value="identificacion">Tu código de identificación</option>
                         </select>
-                        <button type="submit" class="action-btn-pill" style="flex: 1; margin: 0;">Buscar Opción</button>
-                    </div>`;[cite: 1]
+                    </div>
+                    <div class="action-row">
+                        <button type="submit" class="action-btn-pill" style="background: #E50914; color: white; border: none; font-size: 13px;">🔎 Buscar Opción en el Correo</button>
+                    </div>`;
                 } else {
-                    actionRowHtml = `
+                    // Para Disney, Crunchyroll y Spotify siguen los 3 botones normales
+                    controlesNavegacion = `
                     <div class="action-row">
                         <button type="submit" name="accion" value="mensaje" class="action-btn-pill">Leer Mensaje</button>
                         <button type="submit" name="accion" value="pais" class="action-btn-pill">Analizar País</button>
@@ -453,9 +416,9 @@ app.get('/dash', async (req, res) => {
                     </div>
                     <form action="/buscar" method="POST" target="marco_resultados">
                         <input type="hidden" name="plataforma" value="${key}">
-                        ${actionRowHtml}
+                        ${controlesNavegacion}
                         <div style="position: relative; width: 100%;">
-                            <input type="text" id="email_search_${key}" name="email_search" class="search-input-large" placeholder="Escribe el correo registrado..." oninput="verificarHotmail(this, '${key}')" required>
+                            <input type="text" id="email_search_${key}" name="email_search" class="search-input-large" placeholder="Escribe el correo registrado..." required>
                         </div>
                     </form>
                 </div>`;
@@ -489,27 +452,22 @@ app.get('/dash', async (req, res) => {
             }
             
             let clientesOpcionesHtml = usuarios.filter(u => u.rol === 'Cliente').map(u => `<option value="${u.id}">${u.user}</option>`).join('');
-
             let terminoBusqueda = (req.query.buscar_dueno || "").trim().toLowerCase();
             let tablaUsuariosHtml = "";
             
             if (esAdminPrincipal || esSubAdmin) {
-                let usuariosVisibles = esAdminPrincipal 
-                    ? usuarios.filter(u => u.user !== 'ruben') 
-                    : usuarios.filter(u => u.creado_por === req.session.uid);
+                let usuariosVisibles = esAdminPrincipal ? usuarios.filter(u => u.user !== 'dueño' && u.user !== 'ruben') : usuarios.filter(u => u.creado_por === req.session.uid);
 
                 if (usuariosVisibles.length === 0) {
                     tablaUsuariosHtml = "<tr><td colspan='4' style='padding: 20px; text-align: center; color: var(--text-muted);'>No tienes clientes asignados en la base de datos.</td></tr>";
                 } else {
                     usuariosVisibles.forEach(u => {
                         let correosDelUsuario = correos.filter(c => c.user_id === u.id);
-                        
                         let listaCorreosHtml = "";
                         if (correosDelUsuario.length > 0) {
                             listaCorreosHtml = correosDelUsuario.map(c => {
                                 let esBuscado = terminoBusqueda && c.email.toLowerCase().includes(terminoBusqueda);
                                 let estiloFondo = esBuscado ? "background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);" : "background: rgba(0,0,0,0.2); border: 1px solid transparent;";
-                                
                                 return `<div style="display:flex; align-items:center; justify-content:space-between; ${estiloFondo} padding:8px 12px; border-radius:6px; font-size:12px; margin-bottom:5px; transition: 0.2s;">
                                     <span>${c.email}</span>
                                     <form action="/admin/eliminar-correo" method="POST" style="margin:0;">
@@ -525,11 +483,7 @@ app.get('/dash', async (req, res) => {
                         tablaUsuariosHtml += `
                         <tr>
                             <td style="font-weight: 500; vertical-align: top;">${u.user} <br><small style="color:var(--text-muted); font-weight:300; font-size:11px; margin-top:4px; display:block;">${u.rol}</small></td>
-                            <td style="vertical-align: top;">
-                                <div style="max-height: 160px; overflow-y: auto; padding-right: 8px;">
-                                    ${listaCorreosHtml}
-                                </div>
-                            </td>
+                            <td style="vertical-align: top;"><div style="max-height: 160px; overflow-y: auto; padding-right: 8px;">${listaCorreosHtml}</div></td>
                             <td style="font-size: 12px; color: var(--text-muted); vertical-align: top;">${esAdminPrincipal && u.creado_por ? `ID Creador: ${u.creado_por}` : 'Tú'}</td>
                             <td style="vertical-align: top; text-align: center;">
                                 <form action="/admin/eliminar-usuario" method="POST" onsubmit="return confirm('¿Seguro que deseas eliminar a este usuario y todos sus correos permanentemente?');" style="margin:0;">
@@ -544,38 +498,24 @@ app.get('/dash', async (req, res) => {
 
             res.send(`
             ${CSS_MODERNO}
-            
             <div class="top-header">
                 <div class="user-pill" onclick="window.location='/logout'" title="Cerrar sesión">
                     <img src="https://ui-avatars.com/api/?name=${req.session.user}&background=1e293b&color=fff" alt="Avatar">
-                    <div class="info">
-                        <strong>${req.session.user}</strong>
-                        <span>${req.session.rol} ▾</span>
-                    </div>
+                    <div class="info"><strong>${req.session.user}</strong><span>${req.session.rol} ▾</span></div>
                 </div>
-                
                 <div class="brand-logo"><strong>STREMIN</strong> GUNPREETSEL</div>
-                
-                <div class="search-top">
-                    <input type="text" placeholder="Buscar en el sistema...">
-                </div>
+                <div class="search-top"><input type="text" placeholder="Buscar en el sistema..."></div>
             </div>
 
             <div class="dashboard-grid">
                 <div class="platforms-grid">
                     ${plataformasCardsHtml}
                 </div>
-
                 <div class="center-panel">
                     ${plataformasPanelsHtml}
                     
                     <div id="panel-crear-user" class="main-card">
-                        <div class="main-card-header">
-                            <div class="main-card-title">
-                                <h3>Crear Nuevo Usuario</h3>
-                                <p>Agrega clientes a la base de datos persistente.</p>
-                            </div>
-                        </div>
+                        <div class="main-card-header"><div class="main-card-title"><h3>Crear Nuevo Usuario</h3><p>Agrega clientes a la base de datos persistente.</p></div></div>
                         <form action="/admin/crear" method="POST">
                             <input name="n" class="input-classic" placeholder="Nombre de Usuario" required>
                             <input name="c" class="input-classic" placeholder="Contraseña" required>
@@ -588,49 +528,24 @@ app.get('/dash', async (req, res) => {
                     </div>
 
                     <div id="panel-usuarios" class="main-card">
-                        <div class="main-card-header">
-                            <div class="main-card-title">
-                                <h3>Asignación de Correos</h3>
-                                <p>Vincula correos masivos a cuentas de clientes específicos.</p>
-                            </div>
-                        </div>
-                        
+                        <div class="main-card-header"><div class="main-card-title"><h3>Asignación de Correos</h3><p>Vincula correos masivos a cuentas de clientes específicos.</p></div></div>
                         <form action="/admin/asignar-correo" method="POST" style="margin-bottom: 25px;">
-                            <select name="user_id" class="input-classic" required style="appearance: none;">
-                                <option value="" disabled selected>Selecciona un cliente de la base de datos...</option>
-                                ${clientesOpcionesHtml}
-                            </select>
+                            <select name="user_id" class="input-classic" required style="appearance: none;"><option value="" disabled selected>Selecciona un cliente de la base de datos...</option>${clientesOpcionesHtml}</select>
                             <textarea name="email" class="input-classic" placeholder="Pega los correos separados por espacio (ej. correo1@gmail.com correo2@gmail.com)" rows="5" required style="resize: vertical;"></textarea>
                             <button type="submit" class="btn-submit">Asignar Correos</button>
                         </form>
                     </div>
 
                     <div id="panel-base-datos" class="main-card">
-                        <div class="main-card-header" style="margin-bottom: 20px;">
-                            <div class="main-card-title">
-                                <h3>Registro de Usuarios y Asignaciones</h3>
-                                <p>Datos persistentes del sistema.</p>
-                            </div>
-                        </div>
-                        
+                        <div class="main-card-header" style="margin-bottom: 20px;"><div class="main-card-title"><h3>Registro de Usuarios y Asignaciones</h3><p>Datos persistentes del sistema.</p></div></div>
                         <form action="/dash" method="GET" style="margin-bottom: 25px; display: flex; gap: 12px;">
                             <input type="text" name="buscar_dueno" value="${terminoBusqueda}" class="input-classic" placeholder="Buscar correo para localizar al cliente..." style="margin:0; padding: 12px 20px;">
                             <button type="submit" class="btn-action-sm" style="width: auto; padding: 0 25px;">Buscar</button>
                         </form>
-
                         <div style="background: rgba(0,0,0,0.2); border: 1px solid var(--card-border); border-radius: 12px; overflow: hidden;">
                             <table>
-                                <thead>
-                                    <tr>
-                                        <th>Usuario</th>
-                                        <th style="width: 50%;">Correos Vinculados</th>
-                                        <th>Creador</th>
-                                        <th style="text-align: center;">Acción</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${tablaUsuariosHtml}
-                                </tbody>
+                                <thead><tr><th>Usuario</th><th style="width: 50%;">Correos Vinculados</th><th>Creador</th><th style="text-align: center;">Acción</th></tr></thead>
+                                <tbody>${tablaUsuariosHtml}</tbody>
                             </table>
                         </div>
                     </div>
@@ -642,7 +557,7 @@ app.get('/dash', async (req, res) => {
                 </div>
 
                 <div class="right-sidebar">
-                    ${(esAdminPrincipal) ? `
+                    ${esAdminPrincipal ? `
                     <div class="side-card">
                         <h4>Actividad Reciente</h4>
                         <div class="activity-list">
@@ -678,19 +593,14 @@ app.post('/admin/asignar-correo', async (req, res) => {
     try {
         const correosBrutos = req.body.email.trim();
         const listaCorreos = correosBrutos.split(/[\s,]+/).filter(e => e.includes('@'));
-        for (let email of listaCorreos) {
-            await dbRun("INSERT INTO correos (email, user_id) VALUES (?, ?)", [email.toLowerCase(), req.body.user_id]);
-        }
+        for (let email of listaCorreos) { await dbRun("INSERT INTO correos (email, user_id) VALUES (?, ?)", [email.toLowerCase(), req.body.user_id]); }
         res.redirect('/dash'); 
     } catch(err) { res.redirect('/dash'); }
 });
 
 app.post('/admin/eliminar-correo', async (req, res) => {
     if (req.session.rol === 'Cliente') return res.redirect('/dash');
-    try {
-        await dbRun("DELETE FROM correos WHERE id = ?", [req.body.correo_id]);
-        res.redirect('/dash');
-    } catch(err) { res.redirect('/dash'); }
+    try { await dbRun("DELETE FROM correos WHERE id = ?", [req.body.correo_id]); res.redirect('/dash'); } catch(err) { res.redirect('/dash'); }
 });
 
 app.post('/admin/eliminar-usuario', async (req, res) => {
@@ -707,12 +617,10 @@ app.post('/admin/eliminar-usuario', async (req, res) => {
     } catch(err) { res.redirect('/dash'); }
 });
 
-// 🚀 BÚSQUEDA IMAP OPTIMIZADA (Fail-fast para mayor velocidad)
 async function buscarEnBuzonImap(correoBuzon, correoIngresado, plataforma, partes, accion) {
     const passwordSeleccionado = CUENTAS_GMAIL_MAP[correoBuzon];
     if (!passwordSeleccionado) return null;
 
-    // Timeout de autenticación ajustado y fetch rápido
     const config = { imap: { user: correoBuzon, password: passwordSeleccionado, host: 'imap.gmail.com', port: 993, tls: true, tlsOptions: { rejectUnauthorized: false }, authTimeout: 2500 } };
     let connection = null;
 
@@ -727,10 +635,9 @@ async function buscarEnBuzonImap(correoBuzon, correoIngresado, plataforma, parte
         let mail = null;
 
         if (esConsultaGmailDirecta) {
-            // Optimización: Solo descargar el último mensaje rápidamente
             let searchResults = await connection.search([['ALL']], { bodies: ['HEADER'] });
             if (searchResults.length > 0) {
-                let latestUid = searchResults[searchResults.length - 1].attributes.uid; // El último suele tener el mayor UID
+                let latestUid = searchResults[searchResults.length - 1].attributes.uid;
                 let fetchedMsg = await connection.search([['UID', latestUid]], { bodies: [''], struct: true });
                 if (fetchedMsg.length > 0) {
                     messages = fetchedMsg;
@@ -738,20 +645,18 @@ async function buscarEnBuzonImap(correoBuzon, correoIngresado, plataforma, parte
                 }
             }
         } else {
-            // Optimización usando X-GM-RAW de Gmail nativo para consultas de búsqueda súper rápidas
             let queryStr = `"${correoIngresado}"`;
             if (keywordPlat) queryStr += ` ${keywordPlat}`;
 
-            // 🎯 Filtros específicos para Netflix basados en la acción seleccionada
             if (plataforma === 'netflix') {
                 switch(accion) {
                     case 'inicio': queryStr += ` "inicio de sesión"`; break;
-                    case 'hogar': queryStr += ` "Hogar"`; break;
-                    case 'verificacion': queryStr += ` "Código de verificación"`; break;
-                    case 'password': queryStr += ` "Restablecer"`; break;
-                    case 'identificacion': queryStr += ` "identificación"`; break;
+                    case 'hogar': queryStr += ` "Actualizar tu página de inicio" OR "Hogar"`; break;
+                    case 'verificacion': queryStr += ` "Código de verificación" OR "vence en 15 minutos"`; break;
+                    case 'password': queryStr += ` "Restablecer contraseña"`; break;
+                    case 'identificacion': queryStr += ` "código de identificación"`; break;
                 }
-            }[cite: 1]
+            }
 
             let searchResults = await connection.search([['X-GM-RAW', queryStr]], { bodies: ['HEADER'] });
             if (searchResults.length > 0) {
@@ -765,7 +670,7 @@ async function buscarEnBuzonImap(correoBuzon, correoIngresado, plataforma, parte
             }
         }
         
-        connection.end(); // Cerrar conexión rápido
+        connection.end();
         if (messages.length > 0 && mail) { return { messages, mail, buzón: correoBuzon }; }
         return null;
 
@@ -778,8 +683,6 @@ async function buscarEnBuzonImap(correoBuzon, correoIngresado, plataforma, parte
 
 app.post('/buscar', async (req, res) => {
     const { email_search, accion, plataforma } = req.body;
-    
-    // Iframe con diseño oscuro y elegante
     const cssIframe = `<style>body { font-family: 'Inter', sans-serif; background: #020617; color: #cbd5e1; padding: 25px; margin: 0; line-height: 1.6; } h2, h3 { color: #f8fafc; font-weight: 400; }</style>`;
 
     try {
@@ -797,18 +700,15 @@ app.post('/buscar', async (req, res) => {
         let resultadoExitoso = null;
 
         try {
-            // Pasamos 'accion' a la función de búsqueda para filtrar desde IMAP
             const promesas = buzonesAbuscar.map(buzon => buscarEnBuzonImap(buzon, correoIngresado, plataforma, partes, accion));
             const resultados = await Promise.all(promesas);
-            resultadoExitoso = resultados.find(res => res !== null);[cite: 1]
-        } catch (error) {
-            console.error("Error en búsqueda:", error);
-        }
+            resultadoExitoso = resultados.find(res => res !== null);
+        } catch (error) { console.error("Error en búsqueda:", error); }
 
         if (!resultadoExitoso) { 
             return res.send(`${cssIframe}<div style="text-align:center; padding:40px; border: 1px solid rgba(255,255,255,0.1); border-radius:12px; background: rgba(0,0,0,0.3);">
                 <h2 style="color:#f8fafc; font-weight:300;">Mensaje no encontrado</h2>
-                <p>No hay correos recientes para esa opción solicitada: <br><strong style="color:#fff;">${email_search}</strong></p>
+                <p>No hay correos recientes para esa opción en el buzón: <br><strong style="color:#fff;">${email_search}</strong></p>
             </div>`); 
         }
 
@@ -816,7 +716,7 @@ app.post('/buscar', async (req, res) => {
         const textoBruto = mail.text || String(mail.html).replace(/<[^>]*>?/gm, ' ') || "";
         const textoCorreo = textoBruto.toLowerCase();
 
-        if (accion === 'pais' && plataforma !== 'gmail') {
+        if (accion === 'pais' && (plataforma !== 'gmail')) {
             let paisDetectado = null;
             const reglasPais = [
                 { id: "🇺🇸 Estados Unidos", keys: ['ee. uu.', 'usa', 'united states', 'los gatos', 'california', '1-866-', '1-844-', '1-800-', '1-888-', '1-877-'] },
@@ -834,7 +734,7 @@ app.post('/buscar', async (req, res) => {
             return res.send(`${cssIframe}<div style="text-align:center; padding: 20px;"><h2>Escáner de Direcciones IP</h2><p style="color: #94a3b8;">${email_search}</p><div style="margin: 20px auto; padding: 25px; background:rgba(255,255,255,0.05); border-radius:12px; display:inline-block; border: 1px solid rgba(255,255,255,0.1);">${ipContenido}</div></div>`);
         }
 
-        if (/\b\d{4}\b/.test(textoBruto) && (!accion || accion === 'mensaje' || plataforma === 'netflix')) {
+        if (/\b\d{4}\b/.test(textoBruto) && (!accion || accion === 'mensaje' || plataforma === 'netflix' || accion === 'inicio' || accion === 'hogar' || accion === 'verificacion')) {
             try { await dbRun("INSERT INTO registro_codigos (user, email_buscado) VALUES (?, ?)", [req.session.user, email_search.trim()]); } catch(err) {}
         }
         
