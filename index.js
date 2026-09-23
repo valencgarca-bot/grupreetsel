@@ -648,13 +648,20 @@ async function buscarEnBuzonImap(correoBuzon, correoIngresado, plataforma, parte
 
             if (plataforma === 'netflix') {
                 switch(accion) {
-                    case 'inicio': queryStr += ` "inicio de sesión"`; break;
-                    case 'acceso_temporal': queryStr += ` "código de acceso temporal"`; break;
-                    case 'actualizar_hogar': queryStr += ` "¿Solicitaste actualizar tu Hogar con Netflix?" OR "Hogar"`; break;
-                    case 'verificacion': queryStr += ` "Código de verificación" OR "vence en 15 minutos"`; break;
+                    case 'inicio': 
+                        queryStr += ` ("inicio de sesión" OR "sign-in code" OR "código de acesso" OR "sign in to")`; 
+                        break;
+                    case 'acceso_temporal': 
+                        queryStr += ` ("acceso temporal" OR "temporary access" OR "acesso temporário")`; 
+                        break;
+                    case 'actualizar_hogar': 
+                        queryStr += ` ("Hogar" OR "Household" OR "Residência")`; 
+                        break;
+                    case 'verificacion': 
+                        queryStr += ` ("Código de verificación" OR "Verification code" OR "Código de verificação" OR "15 minutos" OR "15 minutes")`; 
+                        break;
                     case 'password': 
-                        // Uso de múltiples variantes para soportar diferentes idiomas asegurando el funcionamiento universal
-                        queryStr += ` ("Complete su solicitud" OR "restablecimiento de contraseña" OR "password reset" OR "reset your password" OR "redefinir senha" OR "recuperar contraseña")`; 
+                        queryStr += ` ("restablecimiento" OR "password reset" OR "reset your password" OR "redefinir senha" OR "recuperar contraseña")`; 
                         break;
                 }
             }
