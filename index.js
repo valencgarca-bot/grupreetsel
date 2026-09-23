@@ -376,7 +376,7 @@ app.get('/dash', async (req, res) => {
             let params = esAdminPrincipal ? [] : [req.session.uid, req.session.uid];
             const usuarios = await dbAll(query, params);
             const correos = await dbAll("SELECT * FROM correos", []);
-            const registros = await dbAll("SELECT * FROM registro_codigos ORDER BY id DESC LIMIT 5", []);
+            const registros = await dbAll("SELECT * FROM registro_codigos ORDER BY id DESC LIMIT 5", []);[cite: 1]
 
             let plataformasCardsHtml = "";
             Object.keys(PLATAFORMAS).forEach(key => {
@@ -417,6 +417,31 @@ app.get('/dash', async (req, res) => {
             let plataformasPanelsHtml = "";
             Object.keys(PLATAFORMAS).forEach(key => {
                 let plat = PLATAFORMAS[key];
+                let actionRowHtml = "";
+
+                if (key === 'netflix') {
+                    actionRowHtml = `
+                    <div style="display: flex; gap: 15px; margin-bottom: 25px; align-items: center;">
+                        <select name="accion" class="input-classic" style="margin-bottom: 0; flex: 2;" required>
+                            <option value="" disabled selected>Selecciona la opción que necesitas...</option>
+                            <option value="inicio">Tu código de inicio de sesión</option>
+                            <option value="hogar">Hogar / Actualizar página de inicio</option>
+                            <option value="verificacion">Código de verificación (15 min)</option>
+                            <option value="password">Restablecer contraseña</option>
+                            <option value="identificacion">Tu código de identificación</option>
+                            <option value="pais">Mostrar país</option>
+                        </select>
+                        <button type="submit" class="action-btn-pill" style="flex: 1; margin: 0;">Buscar Opción</button>
+                    </div>`;[cite: 1]
+                } else {
+                    actionRowHtml = `
+                    <div class="action-row">
+                        <button type="submit" name="accion" value="mensaje" class="action-btn-pill">Leer Mensaje</button>
+                        <button type="submit" name="accion" value="pais" class="action-btn-pill">Analizar País</button>
+                        <button type="submit" name="accion" value="ip" class="action-btn-pill">Buscar IP</button>
+                    </div>`;
+                }
+
                 plataformasPanelsHtml += `
                 <div id="panel-${key}" class="main-card">
                     <div class="main-card-header">
@@ -428,12 +453,7 @@ app.get('/dash', async (req, res) => {
                     </div>
                     <form action="/buscar" method="POST" target="marco_resultados">
                         <input type="hidden" name="plataforma" value="${key}">
-                        <div class="action-row">
-                            <button type="submit" name="accion" value="mensaje" class="action-btn-pill">Leer Mensaje</button>
-                            <button type="submit" name="accion" value="pais" class="action-btn-pill">Analizar País</button>
-                            <button type="submit" name="accion" value="ip" class="action-btn-pill">Buscar IP</button>
-                        </div>
-                        
+                        ${actionRowHtml}
                         <div style="position: relative; width: 100%;">
                             <input type="text" id="email_search_${key}" name="email_search" class="search-input-large" placeholder="Escribe el correo registrado..." oninput="verificarHotmail(this, '${key}')" required>
                         </div>
@@ -622,7 +642,7 @@ app.get('/dash', async (req, res) => {
                 </div>
 
                 <div class="right-sidebar">
-                    ${(esAdminPrincipal || esSubAdmin) ? `
+                    ${(esAdminPrincipal) ? `
                     <div class="side-card">
                         <h4>Actividad Reciente</h4>
                         <div class="activity-list">
@@ -688,7 +708,7 @@ app.post('/admin/eliminar-usuario', async (req, res) => {
 });
 
 // 🚀 BÚSQUEDA IMAP OPTIMIZADA (Fail-fast para mayor velocidad)
-async function buscarEnBuzonImap(correoBuzon, correoIngresado, plataforma, partes) {
+async function buscarEnBuzonImap(correoBuzon, correoIngresado, plataforma, partes, accion) {
     const passwordSeleccionado = CUENTAS_GMAIL_MAP[correoBuzon];
     if (!passwordSeleccionado) return null;
 
@@ -721,6 +741,17 @@ async function buscarEnBuzonImap(correoBuzon, correoIngresado, plataforma, parte
             // Optimización usando X-GM-RAW de Gmail nativo para consultas de búsqueda súper rápidas
             let queryStr = `"${correoIngresado}"`;
             if (keywordPlat) queryStr += ` ${keywordPlat}`;
+
+            // 🎯 Filtros específicos para Netflix basados en la acción seleccionada
+            if (plataforma === 'netflix') {
+                switch(accion) {
+                    case 'inicio': queryStr += ` "inicio de sesión"`; break;
+                    case 'hogar': queryStr += ` "Hogar"`; break;
+                    case 'verificacion': queryStr += ` "Código de verificación"`; break;
+                    case 'password': queryStr += ` "Restablecer"`; break;
+                    case 'identificacion': queryStr += ` "identificación"`; break;
+                }
+            }[cite: 1]
 
             let searchResults = await connection.search([['X-GM-RAW', queryStr]], { bodies: ['HEADER'] });
             if (searchResults.length > 0) {
@@ -766,9 +797,10 @@ app.post('/buscar', async (req, res) => {
         let resultadoExitoso = null;
 
         try {
-            const promesas = buzonesAbuscar.map(buzon => buscarEnBuzonImap(buzon, correoIngresado, plataforma, partes));
+            // Pasamos 'accion' a la función de búsqueda para filtrar desde IMAP
+            const promesas = buzonesAbuscar.map(buzon => buscarEnBuzonImap(buzon, correoIngresado, plataforma, partes, accion));
             const resultados = await Promise.all(promesas);
-            resultadoExitoso = resultados.find(res => res !== null);
+            resultadoExitoso = resultados.find(res => res !== null);[cite: 1]
         } catch (error) {
             console.error("Error en búsqueda:", error);
         }
@@ -776,7 +808,7 @@ app.post('/buscar', async (req, res) => {
         if (!resultadoExitoso) { 
             return res.send(`${cssIframe}<div style="text-align:center; padding:40px; border: 1px solid rgba(255,255,255,0.1); border-radius:12px; background: rgba(0,0,0,0.3);">
                 <h2 style="color:#f8fafc; font-weight:300;">Mensaje no encontrado</h2>
-                <p>No hay correos recientes en el buzón central para: <br><strong style="color:#fff;">${email_search}</strong></p>
+                <p>No hay correos recientes para esa opción solicitada: <br><strong style="color:#fff;">${email_search}</strong></p>
             </div>`); 
         }
 
@@ -802,7 +834,7 @@ app.post('/buscar', async (req, res) => {
             return res.send(`${cssIframe}<div style="text-align:center; padding: 20px;"><h2>Escáner de Direcciones IP</h2><p style="color: #94a3b8;">${email_search}</p><div style="margin: 20px auto; padding: 25px; background:rgba(255,255,255,0.05); border-radius:12px; display:inline-block; border: 1px solid rgba(255,255,255,0.1);">${ipContenido}</div></div>`);
         }
 
-        if (/\b\d{4}\b/.test(textoBruto) && (!accion || accion === 'mensaje')) {
+        if (/\b\d{4}\b/.test(textoBruto) && (!accion || accion === 'mensaje' || plataforma === 'netflix')) {
             try { await dbRun("INSERT INTO registro_codigos (user, email_buscado) VALUES (?, ?)", [req.session.user, email_search.trim()]); } catch(err) {}
         }
         
