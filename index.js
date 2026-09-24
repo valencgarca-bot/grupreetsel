@@ -566,7 +566,17 @@ app.post('/admin/asignar-correo', async (req, res) => {
     try {
         const correosBrutos = req.body.email.trim();
         const listaCorreos = correosBrutos.split(/[\s,]+/).filter(e => e.includes('@'));
-        for (let email of listaCorreos) { await dbRun("INSERT INTO correos (email, user_id) VALUES (?, ?)", [email.toLowerCase(), req.body.user_id]); }
+        for (let email of listaCorreos) { 
+            email = email.toLowerCase();
+            
+            // 🛡️ VALIDACIÓN DE SEGURIDAD 1: Evitar que re-asignen un correo ya registrado
+            const existente = await dbGet("SELECT u.user FROM correos c JOIN usuarios u ON c.user_id = u.id WHERE c.email = ?", [email]);
+            if (existente) {
+                return res.send(`<script>alert('Esta cuenta es del cliente ${existente.user}'); window.location='/dash';</script>`);
+            }
+            
+            await dbRun("INSERT INTO correos (email, user_id) VALUES (?, ?)", [email, req.body.user_id]); 
+        }
         res.redirect('/dash'); 
     } catch(err) { res.redirect('/dash'); }
 });
@@ -619,13 +629,11 @@ async function buscarEnBuzonImap(correoBuzon, correoIngresado, plataforma, parte
                 }
             }
         } else {
-            // Búsqueda directa sin el switch, para traer solo el último mensaje de esa plataforma y correo.
             let queryStr = `"${correoIngresado}"`;
             if (keywordPlat) queryStr += ` ${keywordPlat}`;
 
             let searchResults = await connection.search([['X-GM-RAW', queryStr]], { bodies: ['HEADER.FIELDS (DATE)'] });
             if (searchResults.length > 0) {
-                // Ordenar por fecha real para ignorar hilos de Gmail
                 searchResults.sort((a, b) => new Date(b.attributes.date || 0) - new Date(a.attributes.date || 0));
                 let latestUid = searchResults[0].attributes.uid; 
                 
@@ -655,9 +663,21 @@ app.post('/buscar', async (req, res) => {
     try {
         let correoIngresado = (email_search || "").trim().toLowerCase();
         
-        if (req.session.rol === 'Cliente' && plataforma !== 'gmail') {
-            const permiso = await dbGet("SELECT id FROM correos WHERE email = ? AND user_id = ?", [correoIngresado, req.session.uid]);
-            if (!permiso) {
+        // 🛡️ VALIDACIÓN DE SEGURIDAD 2: Control de búsqueda ajena y restricciones a Sub-Administradores
+        const esAdminPrincipal = (req.session.user === 'dueño' || req.session.user === 'ruben');
+        if (!esAdminPrincipal && plataforma !== 'gmail') {
+            const dueñocuenta = await dbGet("SELECT c.user_id, u.user, u.creado_por FROM correos c JOIN usuarios u ON c.user_id = u.id WHERE c.email = ?", [correoIngresado]);
+            
+            if (dueñocuenta) {
+                const esPropia = (dueñocuenta.user_id === req.session.uid);
+                const esDeMiCliente = (dueñocuenta.creado_por === req.session.uid);
+                
+                // Si el correo tiene un dueño, pero no es del usuario actual ni de un cliente creado por él (si es subadmin)
+                if (!esPropia && !esDeMiCliente) {
+                    return res.send(`${cssIframe}<div style="text-align:center; padding:40px; border: 1px solid rgba(255,255,255,0.1); border-radius:12px; background: rgba(0,0,0,0.3);"><h2 style="color:#f87171;">⛔ Acceso Denegado</h2><p>Esta cuenta le pertenece al cliente ${dueñocuenta.user}</p></div>`);
+                }
+            } else {
+                // Si el correo no tiene dueño registrado en base de datos, nadie a excepción del dueño la puede usar.
                 return res.send(`${cssIframe}<div style="text-align:center; padding:40px; border: 1px solid rgba(255,255,255,0.1); border-radius:12px; background: rgba(0,0,0,0.3);"><h2 style="color:#f87171;">⛔ Acceso Denegado</h2><p>No tienes autorización en la base de datos para consultar este correo.</p></div>`);
             }
         }
