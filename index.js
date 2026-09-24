@@ -568,6 +568,16 @@ app.post('/admin/crear', async (req, res) => {
 app.post('/admin/asignar-correo', async (req, res) => {
     if (req.session.rol === 'Cliente') return res.redirect('/dash');
     try {
+        const targetUserId = req.body.user_id;
+
+        // 🛡️ VALIDACIÓN DE SEGURIDAD 3: Los subadministradores SOLO pueden asignar cuentas a los clientes que ellos crearon
+        if (req.session.rol === 'Subadministrador') {
+            const verificaPropietario = await dbGet("SELECT id FROM usuarios WHERE id = ? AND (creado_por = ? OR id = ?)", [targetUserId, req.session.uid, req.session.uid]);
+            if (!verificaPropietario) {
+                return res.send("<script>alert('⛔ No tienes permiso para asignar cuentas a este usuario.'); window.location='/dash';</script>");
+            }
+        }
+
         const correosBrutos = req.body.email.trim();
         const listaCorreos = correosBrutos.split(/[\s,]+/).filter(e => e.includes('@'));
         for (let email of listaCorreos) { 
@@ -575,11 +585,10 @@ app.post('/admin/asignar-correo', async (req, res) => {
             
             const existente = await dbGet("SELECT u.user FROM correos c JOIN usuarios u ON c.user_id = u.id WHERE c.email = ?", [email]);
             if (existente) {
-                // MODIFICACIÓN APLICADA: Ahora especifica qué correo exacto causa el error
                 return res.send(`<script>alert('El correo ${email} ya está asignado al cliente ${existente.user}'); window.location='/dash';</script>`);
             }
             
-            await dbRun("INSERT INTO correos (email, user_id) VALUES (?, ?)", [email, req.body.user_id]); 
+            await dbRun("INSERT INTO correos (email, user_id) VALUES (?, ?)", [email, targetUserId]); 
         }
         res.redirect('/dash'); 
     } catch(err) { res.redirect('/dash'); }
@@ -676,7 +685,6 @@ app.post('/buscar', async (req, res) => {
                 const esDeMiCliente = (dueñocuenta.creado_por === req.session.uid);
                 
                 if (!esPropia && !esDeMiCliente) {
-                    // MODIFICACIÓN APLICADA: Ahora especifica el correo y el nombre del cliente en la ventana de error del buscador
                     return res.send(`${cssIframe}<div style="text-align:center; padding:40px; border: 1px solid rgba(255,255,255,0.1); border-radius:12px; background: rgba(0,0,0,0.3);"><h2 style="color:#f87171;">⛔ Acceso Denegado</h2><p>El correo <strong>${correoIngresado}</strong> le pertenece al cliente <strong>${dueñocuenta.user}</strong></p></div>`);
                 }
             } else {
