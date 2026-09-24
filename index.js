@@ -424,7 +424,12 @@ app.get('/dash', async (req, res) => {
                 actividadesHtml = `<div class="activity-item"><span>No hay actividades recientes.</span></div>`;
             }
             
-            let clientesOpcionesHtml = usuarios.filter(u => u.rol === 'Cliente').map(u => `<option value="${u.id}">${u.user}</option>`).join('');
+            // MODIFICACIÓN APLICADA: Ahora incluye Subadministradores y Clientes en el select
+            let clientesOpcionesHtml = usuarios
+                .filter(u => u.rol === 'Cliente' || u.rol === 'Subadministrador')
+                .map(u => `<option value="${u.id}">${u.user} (${u.rol})</option>`)
+                .join('');
+            
             let terminoBusqueda = (req.query.buscar_dueno || "").trim().toLowerCase();
             let tablaUsuariosHtml = "";
             
@@ -501,9 +506,9 @@ app.get('/dash', async (req, res) => {
                     </div>
 
                     <div id="panel-usuarios" class="main-card">
-                        <div class="main-card-header"><div class="main-card-title"><h3>Asignación de Correos</h3><p>Vincula correos masivos a cuentas de clientes específicos.</p></div></div>
+                        <div class="main-card-header"><div class="main-card-title"><h3>Asignación de Correos</h3><p>Vincula correos masivos a cuentas específicas.</p></div></div>
                         <form action="/admin/asignar-correo" method="POST" style="margin-bottom: 25px;">
-                            <select name="user_id" class="input-classic" required style="appearance: none;"><option value="" disabled selected>Selecciona un cliente de la base de datos...</option>${clientesOpcionesHtml}</select>
+                            <select name="user_id" class="input-classic" required style="appearance: none;"><option value="" disabled selected>Selecciona un usuario de la base de datos...</option>${clientesOpcionesHtml}</select>
                             <textarea name="email" class="input-classic" placeholder="Pega los correos separados por espacio (ej. correo1@gmail.com correo2@gmail.com)" rows="5" required style="resize: vertical;"></textarea>
                             <button type="submit" class="btn-submit">Asignar Correos</button>
                         </form>
@@ -512,7 +517,7 @@ app.get('/dash', async (req, res) => {
                     <div id="panel-base-datos" class="main-card">
                         <div class="main-card-header" style="margin-bottom: 20px;"><div class="main-card-title"><h3>Registro de Usuarios y Asignaciones</h3><p>Datos persistentes del sistema.</p></div></div>
                         <form action="/dash" method="GET" style="margin-bottom: 25px; display: flex; gap: 12px;">
-                            <input type="text" name="buscar_dueno" value="${terminoBusqueda}" class="input-classic" placeholder="Buscar correo para localizar al cliente..." style="margin:0; padding: 12px 20px;">
+                            <input type="text" name="buscar_dueno" value="${terminoBusqueda}" class="input-classic" placeholder="Buscar correo para localizar al usuario..." style="margin:0; padding: 12px 20px;">
                             <button type="submit" class="btn-action-sm" style="width: auto; padding: 0 25px;">Buscar</button>
                         </form>
                         <div style="background: rgba(0,0,0,0.2); border: 1px solid var(--card-border); border-radius: 12px; overflow: hidden;">
@@ -569,7 +574,6 @@ app.post('/admin/asignar-correo', async (req, res) => {
         for (let email of listaCorreos) { 
             email = email.toLowerCase();
             
-            // 🛡️ VALIDACIÓN DE SEGURIDAD 1: Evitar que re-asignen un correo ya registrado
             const existente = await dbGet("SELECT u.user FROM correos c JOIN usuarios u ON c.user_id = u.id WHERE c.email = ?", [email]);
             if (existente) {
                 return res.send(`<script>alert('Esta cuenta es del cliente ${existente.user}'); window.location='/dash';</script>`);
@@ -663,7 +667,6 @@ app.post('/buscar', async (req, res) => {
     try {
         let correoIngresado = (email_search || "").trim().toLowerCase();
         
-        // 🛡️ VALIDACIÓN DE SEGURIDAD 2: Control de búsqueda ajena y restricciones a Sub-Administradores
         const esAdminPrincipal = (req.session.user === 'dueño' || req.session.user === 'ruben');
         if (!esAdminPrincipal && plataforma !== 'gmail') {
             const dueñocuenta = await dbGet("SELECT c.user_id, u.user, u.creado_por FROM correos c JOIN usuarios u ON c.user_id = u.id WHERE c.email = ?", [correoIngresado]);
@@ -672,12 +675,10 @@ app.post('/buscar', async (req, res) => {
                 const esPropia = (dueñocuenta.user_id === req.session.uid);
                 const esDeMiCliente = (dueñocuenta.creado_por === req.session.uid);
                 
-                // Si el correo tiene un dueño, pero no es del usuario actual ni de un cliente creado por él (si es subadmin)
                 if (!esPropia && !esDeMiCliente) {
                     return res.send(`${cssIframe}<div style="text-align:center; padding:40px; border: 1px solid rgba(255,255,255,0.1); border-radius:12px; background: rgba(0,0,0,0.3);"><h2 style="color:#f87171;">⛔ Acceso Denegado</h2><p>Esta cuenta le pertenece al cliente ${dueñocuenta.user}</p></div>`);
                 }
             } else {
-                // Si el correo no tiene dueño registrado en base de datos, nadie a excepción del dueño la puede usar.
                 return res.send(`${cssIframe}<div style="text-align:center; padding:40px; border: 1px solid rgba(255,255,255,0.1); border-radius:12px; background: rgba(0,0,0,0.3);"><h2 style="color:#f87171;">⛔ Acceso Denegado</h2><p>No tienes autorización en la base de datos para consultar este correo.</p></div>`);
             }
         }
