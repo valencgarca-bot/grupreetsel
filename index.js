@@ -424,7 +424,6 @@ app.get('/dash', async (req, res) => {
                 actividadesHtml = `<div class="activity-item"><span>No hay actividades recientes.</span></div>`;
             }
             
-            // MODIFICACIÓN APLICADA: Ahora incluye Subadministradores y Clientes en el select
             let clientesOpcionesHtml = usuarios
                 .filter(u => u.rol === 'Cliente' || u.rol === 'Subadministrador')
                 .map(u => `<option value="${u.id}">${u.user} (${u.rol})</option>`)
@@ -576,7 +575,8 @@ app.post('/admin/asignar-correo', async (req, res) => {
             
             const existente = await dbGet("SELECT u.user FROM correos c JOIN usuarios u ON c.user_id = u.id WHERE c.email = ?", [email]);
             if (existente) {
-                return res.send(`<script>alert('Esta cuenta es del cliente ${existente.user}'); window.location='/dash';</script>`);
+                // MODIFICACIÓN APLICADA: Ahora especifica qué correo exacto causa el error
+                return res.send(`<script>alert('El correo ${email} ya está asignado al cliente ${existente.user}'); window.location='/dash';</script>`);
             }
             
             await dbRun("INSERT INTO correos (email, user_id) VALUES (?, ?)", [email, req.body.user_id]); 
@@ -676,7 +676,8 @@ app.post('/buscar', async (req, res) => {
                 const esDeMiCliente = (dueñocuenta.creado_por === req.session.uid);
                 
                 if (!esPropia && !esDeMiCliente) {
-                    return res.send(`${cssIframe}<div style="text-align:center; padding:40px; border: 1px solid rgba(255,255,255,0.1); border-radius:12px; background: rgba(0,0,0,0.3);"><h2 style="color:#f87171;">⛔ Acceso Denegado</h2><p>Esta cuenta le pertenece al cliente ${dueñocuenta.user}</p></div>`);
+                    // MODIFICACIÓN APLICADA: Ahora especifica el correo y el nombre del cliente en la ventana de error del buscador
+                    return res.send(`${cssIframe}<div style="text-align:center; padding:40px; border: 1px solid rgba(255,255,255,0.1); border-radius:12px; background: rgba(0,0,0,0.3);"><h2 style="color:#f87171;">⛔ Acceso Denegado</h2><p>El correo <strong>${correoIngresado}</strong> le pertenece al cliente <strong>${dueñocuenta.user}</strong></p></div>`);
                 }
             } else {
                 return res.send(`${cssIframe}<div style="text-align:center; padding:40px; border: 1px solid rgba(255,255,255,0.1); border-radius:12px; background: rgba(0,0,0,0.3);"><h2 style="color:#f87171;">⛔ Acceso Denegado</h2><p>No tienes autorización en la base de datos para consultar este correo.</p></div>`);
