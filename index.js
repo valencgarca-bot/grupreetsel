@@ -569,8 +569,9 @@ app.post('/admin/asignar-correo', async (req, res) => {
     if (req.session.rol === 'Cliente') return res.redirect('/dash');
     try {
         const targetUserId = req.body.user_id;
+        const esAdminPrincipal = (req.session.user === 'dueño' || req.session.user === 'ruben');
 
-        // 🛡️ VALIDACIÓN DE SEGURIDAD 3: Los subadministradores SOLO pueden asignar cuentas a los clientes que ellos crearon
+        // Validar que un subadmin solo manipule cuentas propias o clientes que él mismo creó
         if (req.session.rol === 'Subadministrador') {
             const verificaPropietario = await dbGet("SELECT id FROM usuarios WHERE id = ? AND (creado_por = ? OR id = ?)", [targetUserId, req.session.uid, req.session.uid]);
             if (!verificaPropietario) {
@@ -580,15 +581,29 @@ app.post('/admin/asignar-correo', async (req, res) => {
 
         const correosBrutos = req.body.email.trim();
         const listaCorreos = correosBrutos.split(/[\s,]+/).filter(e => e.includes('@'));
+        
         for (let email of listaCorreos) { 
             email = email.toLowerCase();
             
-            const existente = await dbGet("SELECT u.user FROM correos c JOIN usuarios u ON c.user_id = u.id WHERE c.email = ?", [email]);
-            if (existente) {
-                return res.send(`<script>alert('El correo ${email} ya está asignado al cliente ${existente.user}'); window.location='/dash';</script>`);
-            }
+            // Verificamos si el correo ya existe en toda la base de datos
+            const existente = await dbGet("SELECT c.id, c.user_id, u.user, u.creado_por FROM correos c JOIN usuarios u ON c.user_id = u.id WHERE c.email = ?", [email]);
             
-            await dbRun("INSERT INTO correos (email, user_id) VALUES (?, ?)", [email, targetUserId]); 
+            if (existente) {
+                // Si la cuenta ya existe, evaluamos si el usuario actual tiene derecho a REASIGNARLA
+                // Se puede reasignar si es Admin, o si el Subadmin actual es el dueño de la cuenta, o si fue creada por él
+                const puedeReasignar = esAdminPrincipal || (existente.user_id === req.session.uid) || (existente.creado_por === req.session.uid);
+                
+                if (puedeReasignar) {
+                    // Mueve la cuenta (reasignación / transferencia) de Eliel a su cliente
+                    await dbRun("UPDATE correos SET user_id = ? WHERE id = ?", [targetUserId, existente.id]);
+                } else {
+                    // Bloquea el robo de cuentas entre subadministradores diferentes
+                    return res.send(`<script>alert('El correo ${email} ya está asignado a ${existente.user} y no tienes permisos sobre esa cuenta.'); window.location='/dash';</script>`);
+                }
+            } else {
+                // Es una cuenta completamente nueva, se inserta normalmente
+                await dbRun("INSERT INTO correos (email, user_id) VALUES (?, ?)", [email, targetUserId]); 
+            }
         }
         res.redirect('/dash'); 
     } catch(err) { res.redirect('/dash'); }
